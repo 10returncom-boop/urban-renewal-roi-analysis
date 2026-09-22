@@ -321,17 +321,15 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
       <div class="crumb" id="crumb">首頁</div>
       <div class="topbar-spacer"></div>
       <div class="case-switch">
-        <button class="case-btn active" onclick="loadCase('A',this)">案A｜南興段226</button>
-        <button class="case-btn" onclick="loadCase('B',this)">案B｜惠信段10</button>
+        <button class="case-btn active" onclick="loadCase('A',this)">案A</button>
+        <button class="case-btn" onclick="loadCase('B',this)">案B</button>
       </div>
       <div class="dropdown" id="toolDropdown">
-        <button class="dropdown-toggle" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')">工具 ▾</button>
+        <button class="dropdown-toggle" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')">匯出 ▾</button>
         <div class="dropdown-menu">
+          <button class="dropdown-item" onclick="window.print();closeDropdown()"><span class="ico">⎙</span>匯出 PDF / 列印報表</button>
           <button class="dropdown-item" onclick="toggleTheme();closeDropdown()"><span class="ico">◐</span><span id="themeBtnLabel">切換為淺色</span></button>
-          <button class="dropdown-item" onclick="window.print();closeDropdown()"><span class="ico">⎙</span>匯出報表 / 列印</button>
           <div class="dropdown-sep"></div>
-          <button class="dropdown-item" onclick="go('f01');closeDropdown()"><span class="ico">⌂</span>回首頁（基地輸入）</button>
-          <button class="dropdown-item" onclick="go('sitemap');closeDropdown()"><span class="ico">◎</span>網站地圖</button>
           <button class="dropdown-item danger" onclick="if(confirm('重置所有輸入為預設值？')){localStorage.removeItem('landvol_state');location.reload()};closeDropdown()"><span class="ico">↺</span>重置所有資料</button>
         </div>
       </div>
