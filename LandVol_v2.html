@@ -200,16 +200,27 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
 @media(max-width:1100px){
   .grid-4{grid-template-columns:repeat(2,1fr)}
   .grid-3{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:800px){
-  .sidebar{transform:translateX(-100%);transition:transform .2s}
-  .sidebar.open{transform:none}
+  /* 手機/平板：sidebar 改漢堡收合模式 */
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease}
+  .sidebar.open{transform:none;box-shadow:4px 0 24px rgba(0,0,0,.3)}
   .app{grid-template-columns:1fr}
   .main{margin-left:0}
-  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
   .menu-toggle{display:inline-flex!important}
+  .sidebar-overlay{
+    display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99;
+    opacity:0;pointer-events:none;transition:opacity .25s;
+  }
+  .sidebar.open ~ .sidebar-overlay{opacity:1;pointer-events:auto}
 }
-.menu-toggle{display:none;background:var(--bg3);border:1px solid var(--line);color:var(--fg);width:36px;height:36px;border-radius:6px;cursor:pointer;align-items:center;justify-content:center}
+@media(max-width:800px){
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .content{padding:16px}
+  .topbar{padding:10px 14px;gap:10px}
+  .brand{font-size:16px}
+  .crumb{display:none}
+}
+.menu-toggle{display:none;background:var(--bg3);border:1px solid var(--line);color:var(--fg);width:36px;height:36px;border-radius:6px;cursor:pointer;align-items:center;justify-content:center;font-size:18px;line-height:1;padding:0}
+.sidebar-overlay{display:none}
 /* 捲軸 */
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
@@ -277,6 +288,7 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
       設計規劃開發：<b style="color:var(--accent)">張書欣</b>
     </div>
   </aside>
+  <div class="sidebar-overlay" onclick="document.getElementById('sidebar').classList.remove('open')"></div>
 
   <!-- ===== 主區 ===== -->
   <div class="main">
