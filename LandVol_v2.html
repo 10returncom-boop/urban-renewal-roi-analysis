@@ -221,6 +221,29 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
 }
 .menu-toggle{display:none;background:var(--bg3);border:1px solid var(--line);color:var(--fg);width:36px;height:36px;border-radius:6px;cursor:pointer;align-items:center;justify-content:center;font-size:18px;line-height:1;padding:0}
 .sidebar-overlay{display:none}
+/* ===== Topbar Dropdown ===== */
+.dropdown{position:relative;display:inline-block}
+.dropdown-toggle{background:var(--bg3);border:1px solid var(--line);color:var(--fg);
+  padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit;
+  display:inline-flex;align-items:center;gap:6px}
+.dropdown-toggle:hover{border-color:var(--accent);color:var(--accent)}
+.dropdown-menu{
+  position:absolute;right:0;top:calc(100% + 6px);min-width:200px;
+  background:var(--bg2);border:1px solid var(--line);border-radius:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);padding:6px;z-index:200;
+  display:none;flex-direction:column;gap:2px;
+}
+.dropdown.open .dropdown-menu{display:flex}
+.dropdown-item{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:9px 12px;border:none;background:transparent;color:var(--fg2);
+  font-size:13px;font-family:inherit;border-radius:6px;cursor:pointer;
+}
+.dropdown-item:hover{background:var(--bg3);color:var(--fg)}
+.dropdown-item.danger{color:#e06c6c}
+.dropdown-sep{height:1px;background:var(--line);margin:4px 0}
+.dropdown-item .ico{width:18px;text-align:center;opacity:.7}
+
 /* 捲軸 */
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
@@ -301,8 +324,17 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
         <button class="case-btn active" onclick="loadCase('A',this)">案A｜南興段226</button>
         <button class="case-btn" onclick="loadCase('B',this)">案B｜惠信段10</button>
       </div>
-      <button class="btn" onclick="toggleTheme()" id="themeBtn">切換為淺色</button>
-      <button class="btn btn-primary" onclick="window.print()">匯出報表</button>
+      <div class="dropdown" id="toolDropdown">
+        <button class="dropdown-toggle" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')">工具 ▾</button>
+        <div class="dropdown-menu">
+          <button class="dropdown-item" onclick="toggleTheme();closeDropdown()"><span class="ico">◐</span><span id="themeBtnLabel">切換為淺色</span></button>
+          <button class="dropdown-item" onclick="window.print();closeDropdown()"><span class="ico">⎙</span>匯出報表 / 列印</button>
+          <div class="dropdown-sep"></div>
+          <button class="dropdown-item" onclick="go('f01');closeDropdown()"><span class="ico">⌂</span>回首頁（基地輸入）</button>
+          <button class="dropdown-item" onclick="go('sitemap');closeDropdown()"><span class="ico">◎</span>網站地圖</button>
+          <button class="dropdown-item danger" onclick="if(confirm('重置所有輸入為預設值？')){localStorage.removeItem('landvol_state');location.reload()};closeDropdown()"><span class="ico">↺</span>重置所有資料</button>
+        </div>
+      </div>
     </header>
     <main class="content" id="content"><!-- JS 產生 --></main>
     <footer class="footer">
@@ -594,11 +626,17 @@ function loadCase(k, btn){
   if(active) renderView(active.dataset.id); else go('f01');
 }
 
+
+function closeDropdown(){const d=document.getElementById('toolDropdown');if(d)d.classList.remove('open')}
+document.addEventListener('click',function(e){
+  const d=document.getElementById('toolDropdown');
+  if(d && !d.contains(e.target)) d.classList.remove('open');
+});
 function toggleTheme(){
   const html=document.documentElement;
   const cur=html.getAttribute('data-theme')==='light'?'dark':'light';
   html.setAttribute('data-theme',cur);
-  document.getElementById('themeBtn').textContent = cur==='light'?'切換為深色':'切換為淺色';
+  document.getElementById('themeBtnLabel').textContent = cur==='light'?'切換為深色':'切換為淺色';
 }
 function toast(msg){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
