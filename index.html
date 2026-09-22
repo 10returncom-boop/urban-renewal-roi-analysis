@@ -30,7 +30,7 @@ body {
   background:var(--bg-primary); color:var(--text-primary);
   line-height:1.6; min-height:100vh; transition:background .3s,color .3s;
 }
-.header {
+.header { display:none; 
   background:var(--bg-secondary); border-bottom:1px solid var(--border);
   padding:16px 32px; position:sticky; top:0; z-index:100; backdrop-filter:blur(10px);
 }
@@ -171,7 +171,7 @@ body {
   .grid-2, .grid-3, .grid-4 { grid-template-columns:1fr; }
   .result-grid { grid-template-columns:1fr; }
   .main { padding:14px; }
-  .header { padding:12px 14px; }
+  .header { display:none;  padding:12px 14px; }
   .header h1 { font-size:15px; }
   .header-meta { display:none; }
 }
@@ -249,7 +249,7 @@ body {
   </aside>
 
   <main class="main">
-    <nav class="breadcrumb">首頁 <span class="sep">/</span> 不動產開發 <span class="sep">/</span> 東區東光園道案</nav>
+    <nav class="breadcrumb">首頁 <span class="sep">/</span> 不動產開發</nav>
 
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-label">總成本</div><div class="kpi-value" id="kpiCost">21.66<span class="unit">億</span></div><div class="kpi-sub">含土地、營建、管銷、稅賦、利息</div></div>
@@ -491,7 +491,7 @@ body {
   </main>
 </div>
 
-<footer class="footer">都更投資報酬率分析系統 v2.0 ｜ 案號 E1080822 ｜ 僅供參考，不構成投資建議</footer>
+<footer class="footer">都更投資報酬率分析系統 v2.0 ｜ 案號 E1080822 ｜ 僅供參考，不構成投資建議 ｜ 張書欣 規劃設計開發</footer>
 
 <script>
 // ===== 核心財務引擎 =====
