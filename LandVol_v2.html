@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>房地算算網 9R｜LandVol 容積前置試算｜土地還沒買，法規先算完</title>
+<title>房地算算網｜容積前置試算｜土地還沒買，法規先算完</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>L</text></svg>">
 <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Noto+Serif+TC:wght@600;900&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
@@ -274,17 +274,17 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
 </style>
 </head>
 <body>
-<div class="protect-watermark"><span>© 房地算算網 9R LandVol｜設計規劃開發：張書欣｜未經授權禁止重製</span></div>
+<div class="protect-watermark"><span>© 房地算算網｜設計規劃開發：張書欣｜未經授權禁止重製</span></div>
 <div class="app">
   <!-- ===== 側邊欄 ===== -->
   <aside class="sidebar" id="sidebar">
     <div class="logo">
-      <h1>房地算算網<small style="font-size:12px;color:var(--accent);font-weight:400;margin-left:6px">9R｜LandVol</small></h1>
+      <h1>房地算算網</h1>
       <p>容積前置試算平台｜土地還沒買，法規先算完</p>
     </div>
     <nav id="nav"><!-- JS 產生 --></nav>
     <div class="sidebar-footer">
-      房地算算網 9R LandVol v2.0<br>
+      房地算算網 v2.0<br>
       設計規劃開發：<b style="color:var(--accent)">張書欣</b>
     </div>
   </aside>
@@ -294,7 +294,7 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
   <div class="main">
     <header class="topbar">
       <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
-      <div class="brand">房地算算網<small style="font-size:11px;color:var(--accent);margin-left:6px">9R LandVol</small></div>
+      <div class="brand">房地算算網</div>
       <div class="crumb" id="crumb">首頁</div>
       <div class="topbar-spacer"></div>
       <div class="case-switch">
@@ -307,7 +307,7 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
     <main class="content" id="content"><!-- JS 產生 --></main>
     <footer class="footer">
       <div>
-        <div class="footer-brand">房地算算網<small style="font-size:13px;color:var(--accent);margin-left:6px">9R LandVol</small></div>
+        <div class="footer-brand">房地算算網</div>
         <div class="footer-meta">
           容積前置試算平台｜土地還沒買，法規先算完<br>
           整合都市計畫、建蔽率、容積獎勵、量體規劃與投報敏感性分析，<br>
@@ -336,7 +336,7 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
         <a onclick="toast('危老重建條例（法規查詢中）')">危老重建條例</a>
       </div>
       <div class="footer-bottom">
-        <div>© 2026 LandVol Platform. 本試算結果僅供開發前期參考，實際以建築師與都市發展局審查為準。</div>
+        <div>© 2026 房地算算網. 本試算結果僅供開發前期參考，實際以建築師與都市發展局審查為準。</div>
         <div>設計規劃開發：<b>張書欣</b>｜版本 v2.0</div>
       </div>
     </footer>
@@ -346,7 +346,7 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
 
 <script>
 /* ============================================================
- *  LandVol 核心狀態
+ *  房地算算網 核心狀態
  * ============================================================ */
 const C = {
   PING:3.3058,
@@ -1185,9 +1185,9 @@ VIEW_BUILDERS.sitemap = R=>`
   </div>`).join('')}
 </div>
 <div class="card mt-3">
-  <h4 style="color:var(--fg);margin-bottom:10px">關於房地算算網 9R LandVol</h4>
+  <h4 style="color:var(--fg);margin-bottom:10px">關於房地算算網</h4>
   <p class="muted" style="line-height:1.9">
-    房地算算網 9R 是一套為不動產開發前期設計的容積與投報試算平台（LandVol）。
+    房地算算網是一套為不動產開發前期設計的容積與投報試算平台。
     從基地法規套疊、容積獎勵疊加、量體規劃、成本與稅務，到最終投報紅綠燈與兩平敏感性熱區圖，
     一頁式完成「土地還沒買，法規先算完」的前置評估。<br><br>
     設計規劃開發：<b style="color:var(--accent)">張書欣</b>｜版本 v2.0｜2026
@@ -1273,7 +1273,7 @@ function drawBreakeven(R){
   document.addEventListener('copy', e=>{
     e.preventDefault();
     const sel = window.getSelection().toString();
-    const notice = sel + '\n\n——\n本內容來自 房地算算網 9R LandVol\n設計規劃開發：張書欣 © 2026\n未經授權禁止轉載。';
+    const notice = sel + '\n\n——\n本內容來自 房地算算網\n設計規劃開發：張書欣 © 2026\n未經授權禁止轉載。';
     e.clipboardData.setData('text/plain', notice);
     toast('已複製，並附加版權聲明');
   });
@@ -1286,7 +1286,7 @@ function drawBreakeven(R){
     if(isDev && !devWarned){
       devWarned=true;
       document.title = '⚠️ 未經授權檢視';
-      setTimeout(()=>{ document.title='房地算算網 9R｜LandVol 容積前置試算'; devWarned=false; }, 2000);
+      setTimeout(()=>{ document.title='房地算算網 容積前置試算'; devWarned=false; }, 2000);
     }
   }, 2000);
 })();
