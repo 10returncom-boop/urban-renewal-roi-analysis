@@ -222,6 +222,19 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
 }
 .menu-toggle{display:none;background:var(--bg3);border:1px solid var(--line);color:var(--fg);width:36px;height:36px;border-radius:6px;cursor:pointer;align-items:center;justify-content:center;font-size:18px;line-height:1;padding:0}
 .sidebar-overlay{display:none}
+/* Sidebar 手機版關閉鈕 */
+.sidebar-close{display:none}
+@media(max-width:1100px){
+  .sidebar{position:fixed}
+  .sidebar-close{
+    display:flex;position:absolute;top:14px;right:14px;
+    width:32px;height:32px;border-radius:6px;cursor:pointer;
+    background:var(--bg3);border:1px solid var(--line);color:var(--fg);
+    align-items:center;justify-content:center;font-size:16px;line-height:1;z-index:110;
+  }
+  .sidebar-close:hover{border-color:var(--accent);color:var(--accent)}
+}
+
 /* ===== Topbar Dropdown ===== */
 .dropdown{position:relative;display:inline-block}
 .dropdown-toggle{background:var(--bg3);border:1px solid var(--line);color:var(--fg);
@@ -302,6 +315,7 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
 <div class="app">
   <!-- ===== 側邊欄 ===== -->
   <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close" onclick="document.getElementById('sidebar').classList.remove('open')" aria-label="關閉選單">✕</button>
     <div class="logo">
       <h1>房地算算網</h1>
       <p>容積前置試算平台｜土地還沒買，法規先算完</p>
