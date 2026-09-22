@@ -614,6 +614,8 @@ function renderNav(){
 }
 
 function go(id, el){
+  // 手機版：點選功能後自動收合 sidebar
+  const sb=document.getElementById('sidebar'); if(sb) sb.classList.remove('open');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if(el) el.classList.add('active'); else {
     const e=document.querySelector(`.nav-item[data-id="${id}"]`); if(e) e.classList.add('active');
