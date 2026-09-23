@@ -678,6 +678,20 @@ function loadCase(k, btn){
 }
 
 
+function applyZone(row){
+  const z=row.dataset.zone, b=parseFloat(row.dataset.bcr), f=parseFloat(row.dataset.far);
+  S.zone=z; S.bcr=b; S.far=f;
+  // farCap 暫定為 far*1.6（一般獎勵上限）
+  S.farCap=Math.round(f*1.6*100)/100;
+  toast('已帶入：'+z+'（建蔽率'+(b*100)+'% / 容積率'+(f*100)+'%）');
+  render();
+}
+function filterZoneTable(){
+  const q=document.getElementById('zoneSearch').value.trim();
+  document.querySelectorAll('#zoneDbTable .zone-row').forEach(tr=>{
+    tr.style.display = tr.innerText.includes(q) ? '' : 'none';
+  });
+}
 function closeDropdown(){const d=document.getElementById('toolDropdown');if(d)d.classList.remove('open')}
 document.addEventListener('click',function(e){
   const d=document.getElementById('toolDropdown');
@@ -797,6 +811,36 @@ VIEW_BUILDERS.f03 = R=>`
 <tr><td>適用危老重建</td><td><span class="badge badge-ok">可申請</span></td><td>都計內、非工業區、屋齡符合</td></tr>
 <tr><td>適用容積移轉</td><td>${S.useTransfer?'<span class="badge badge-ok">可</span>':'<span class="badge badge-warn">受最小單元限制</span>'}</td><td>整體開發地區上限 ${pct(S.transferCap)}</td></tr>
 </table>
+</div>
+
+<div class="card mt-2">
+  <h3>台灣都市計畫使用分區 × 建蔽率 × 容積率 資料庫</h3>
+  <div class="muted mb-2">點選任一列即可帶入該分區的法定建蔽率與容積率（以台中市常見分區為例，實際依各縣市細部計畫）</div>
+  <input type="text" id="zoneSearch" placeholder="🔍 輸入分區名稱篩選（例：住、商、工業）..." oninput="filterZoneTable()" style="width:100%;padding:8px 12px;margin-bottom:12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)">
+  <div style="overflow-x:auto">
+  <table class="tbl" id="zoneDbTable" style="table-layout:fixed;width:100%">
+    <thead><tr><th style="width:18%">分區代碼</th><th style="width:22%">分區名稱</th><th style="width:15%">建蔽率</th><th style="width:15%">容積率</th><th style="width:30%">備註</th></tr></thead>
+    <tbody>
+      <tr class="zone-row" data-zone="住1" data-bcr="0.60" data-far="1.65" onclick="applyZone(this)"><td>住1</td><td>第一種住宅區</td><td>60%</td><td>165%</td><td>低密度住宅，北屯/西屯常見</td></tr>
+      <tr class="zone-row" data-zone="住1-1" data-bcr="0.60" data-far="1.65" onclick="applyZone(this)"><td>住1-1</td><td>第一之一種住宅區</td><td>60%</td><td>165%</td><td>本案例A適用</td></tr>
+      <tr class="zone-row" data-zone="住1-2" data-bcr="0.60" data-far="2.00" onclick="applyZone(this)"><td>住1-2</td><td>第一之二種住宅區</td><td>60%</td><td>200%</td><td>中高層住宅</td></tr>
+      <tr class="zone-row" data-zone="住2" data-bcr="0.60" data-far="1.80" onclick="applyZone(this)"><td>住2</td><td>第二種住宅區</td><td>60%</td><td>180%</td><td>本案例B適用</td></tr>
+      <tr class="zone-row" data-zone="住2-1" data-bcr="0.60" data-far="2.00" onclick="applyZone(this)"><td>住2-1</td><td>第二之一種住宅區</td><td>60%</td><td>200%</td><td>高中層集合住宅</td></tr>
+      <tr class="zone-row" data-zone="住3" data-bcr="0.60" data-far="2.25" onclick="applyZone(this)"><td>住3</td><td>第三種住宅區</td><td>60%</td><td>225%</td><td>高層集合住宅</td></tr>
+      <tr class="zone-row" data-zone="住3-1" data-bcr="0.60" data-far="3.00" onclick="applyZone(this)"><td>住3-1</td><td>第三之一種住宅區</td><td>60%</td><td>300%</td><td>捷運聯開/整體開發區</td></tr>
+      <tr class="zone-row" data-zone="住4" data-bcr="0.50" data-far="3.20" onclick="applyZone(this)"><td>住4</td><td>第四種住宅區</td><td>50%</td><td>320%</td><td>超高層住宅，限特定單元</td></tr>
+      <tr class="zone-row" data-zone="商1" data-bcr="0.80" data-far="3.20" onclick="applyZone(this)"><td>商1</td><td>第一種商業區</td><td>80%</td><td>320%</td><td>臨街店鋪商業</td></tr>
+      <tr class="zone-row" data-zone="商2" data-bcr="0.80" data-far="4.00" onclick="applyZone(this)"><td>商2</td><td>第二種商業區</td><td>80%</td><td>400%</td><td>一般商業大樓</td></tr>
+      <tr class="zone-row" data-zone="商3" data-bcr="0.80" data-far="6.00" onclick="applyZone(this)"><td>商3</td><td>第三種商業區</td><td>80%</td><td>600%</td><td>主要商業區/百貨</td></tr>
+      <tr class="zone-row" data-zone="商4" data-bcr="0.80" data-far="8.00" onclick="applyZone(this)"><td>商4</td><td>第四種商業區</td><td>80%</td><td>800%</td><td>台北信義/台中七期等</td></tr>
+      <tr class="zone-row" data-zone="工業區" data-bcr="0.70" data-far="2.10" onclick="applyZone(this)"><td>工業區</td><td>丁種建築用地</td><td>70%</td><td>210%</td><td>廠房/辦公，危老不適用</td></tr>
+      <tr class="zone-row" data-zone="特工" data-bcr="0.70" data-far="2.00" onclick="applyZone(this)"><td>特工</td><td>特種工業區</td><td>70%</td><td>200%</td><td>保護區內工業</td></tr>
+      <tr class="zone-row" data-zone="文教" data-bcr="0.50" data-far="1.60" onclick="applyZone(this)"><td>文教</td><td>文教區</td><td>50%</td><td>160%</td><td>學校/文化機構</td></tr>
+      <tr class="zone-row" data-zone="風景" data-bcr="0.60" data-far="1.20" onclick="applyZone(this)"><td>風景</td><td>風景區</td><td>60%</td><td>120%</td><td>景觀別墅/民宿</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="muted mt-2">資料來源：都市計畫法、台中市都市計畫書圖、各縣市分區管制自治條例。※依據案例差異規劃，實際數值請以當地都市計畫單位公告為準。</div>
 </div>`;
 
 /* ===== F04 臨路條件 ===== */
