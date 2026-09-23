@@ -258,6 +258,40 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
 .dropdown-sep{height:1px;background:var(--line);margin:4px 0}
 .dropdown-item .ico{width:18px;text-align:center;opacity:.7}
 
+/* ===== Hero Banner ===== */
+.hero{
+  position:relative;height:280px;border-radius:14px;overflow:hidden;margin-bottom:22px;
+  box-shadow:0 8px 28px rgba(0,0,0,.12);
+}
+.hero-slides{position:absolute;inset:0}
+.hero-slides img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  animation:heroCross 8s infinite ease-in-out;opacity:0;
+}
+.hero-slides img:nth-child(2){animation-delay:4s}
+@keyframes heroCross{
+  0%{opacity:0}10%{opacity:1}45%{opacity:1}55%{opacity:0}100%{opacity:0}
+}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(10,20,40,.75) 0%,rgba(10,20,40,.35) 60%,rgba(10,20,40,.15) 100%);
+}
+.hero-text{
+  position:absolute;left:32px;bottom:28px;color:#fff;max-width:640px;
+}
+.hero-text h2{font-family:'Noto Serif TC',serif;font-size:28px;font-weight:900;line-height:1.3;margin:0 0 8px;text-shadow:0 2px 12px rgba(0,0,0,.4)}
+.hero-text p{font-size:14px;opacity:.9;margin:0;line-height:1.7}
+.hero-badge{
+  display:inline-block;font-size:11px;font-weight:700;letter-spacing:2px;
+  background:rgba(255,255,255,.18);backdrop-filter:blur(6px);
+  padding:4px 12px;border-radius:20px;margin-bottom:12px;text-transform:uppercase;
+}
+@media(max-width:800px){
+  .hero{height:200px}
+  .hero-text{left:18px;bottom:18px}
+  .hero-text h2{font-size:20px}
+  .hero-text p{font-size:12px}
+}
 /* 捲軸 */
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
@@ -691,6 +725,18 @@ function bindInputs(){
 const VIEW_BUILDERS = {};
 /* ===== F01 基地基本資料 ===== */
 VIEW_BUILDERS.f01 = R=>`
+<div class="hero">
+  <div class="hero-slides">
+    <img src="assets/hero_city.jpg" alt="現代都市天際線">
+    <img src="assets/hero_tower.jpg" alt="高層建築空拍">
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-text">
+    <div class="hero-badge">Land Planning Intelligence</div>
+    <h2>土地還沒買，法規先算完</h2>
+    <p>整合都市計畫、建蔽率、容積獎勵、量體規劃與投報敏感性分析，為不動產開發前期決策提供即時試算。</p>
+  </div>
+</div>
 <div class="view-head"><h2><span class="num">01</span>基地基本資料輸入</h2><p>輸入地段地號、基地面積與使用分區。面積自動坪/㎡換算。</p></div>
 <div class="grid grid-2">
   <div class="card"><h3>基地參數</h3>
