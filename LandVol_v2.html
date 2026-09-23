@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -345,7 +345,7 @@ input,textarea,select{user-select:text;-webkit-user-select:text}
         <button class="dropdown-toggle" onclick="event.stopPropagation();this.parentElement.classList.toggle('open')">匯出 ▾</button>
         <div class="dropdown-menu">
           <button class="dropdown-item" onclick="window.print();closeDropdown()"><span class="ico">⎙</span>匯出 PDF / 列印報表</button>
-          <button class="dropdown-item" onclick="toggleTheme();closeDropdown()"><span class="ico">◐</span><span id="themeBtnLabel">切換為淺色</span></button>
+          <button class="dropdown-item" onclick="toggleTheme();closeDropdown()"><span class="ico">◐</span><span id="themeBtnLabel">切換為深色</span></button>
           <div class="dropdown-sep"></div>
           <button class="dropdown-item danger" onclick="if(confirm('重置所有輸入為預設值？')){localStorage.removeItem('landvol_state');location.reload()};closeDropdown()"><span class="ico">↺</span>重置所有資料</button>
         </div>
