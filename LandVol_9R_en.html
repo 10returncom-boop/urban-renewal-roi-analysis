@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>9R LandVol Calculator v3.0｜NLSC Zoning FAR Calculator Engine</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--bg:#0f1419;--bg2:#1a2028;--bg3:#242c37;--line:#2e3845;--fg:#e8edf2;--fg2:#8b96a5;--accent:#d4a853;--accent2:#3da9fc;--ok:#4ade80;--warn:#fbbf24;--err:#f87171;--radius:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Microsoft JhengHei',sans-serif;background:var(--bg);color:var(--fg);font-size:14px;line-height:1.6;overflow-x:hidden}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto;z-index:100;transition:transform .3s}
+.sidebar.collapsed{transform:translateX(-260px)}
+.main{margin-left:260px;transition:margin .3s;min-height:100vh}
+.main.expanded{margin-left:0}
+@media(max-width:1100px){.sidebar{transform:translateX(-260px)}.sidebar.mobile-open{transform:translateX(0)}.main{margin-left:0}.footer{margin-left:0}}
+.brand{padding:20px;border-bottom:1px solid var(--line)}
+.brand h1{font-size:18px;color:var(--accent)}
+.brand .ver{font-size:10px;color:var(--fg2);margin-top:4px}
+.brand .badge{display:inline-block;font-size:10px;background:var(--err);color:#fff;padding:2px 8px;border-radius:4px;margin-top:6px}
+.nav{padding:12px 0}
+.nav-group{padding:8px 20px;font-size:11px;color:var(--fg2);margin-top:8px}
+.nav-item{display:block;padding:10px 20px;color:var(--fg2);cursor:pointer;border-left:3px solid transparent}
+.nav-item:hover{background:var(--bg3);color:var(--fg)}
+.nav-item.active{background:var(--bg3);color:var(--accent);border-left-color:var(--accent)}
+.topbar{position:sticky;top:0;background:rgba(15,20,25,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:12px 24px;display:flex;align-items:center;gap:16px;z-index:50}
+.hamburger{background:none;border:none;color:var(--fg);font-size:20px;cursor:pointer}
+.crumb{color:var(--fg2);font-size:13px}
+.spacer{flex:1}
+.btn{padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:var(--bg3);color:var(--fg);cursor:pointer;font-size:13px}
+.btn:hover{border-color:var(--accent)}
+.btn-accent{background:var(--accent);color:#1a1a1a;border:none;font-weight:700}
+.content{padding:24px;max-width:1400px;margin:0 auto}
+.hero{background:linear-gradient(135deg,#1a2028,#2a3548);border-radius:var(--radius);padding:32px;margin-bottom:24px;border:1px solid var(--line);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;right:-10%;width:400px;height:400px;background:radial-gradient(circle,rgba(212,168,83,.15),transparent 70%);border-radius:50%}
+.hero h2{font-size:28px;color:var(--accent);margin-bottom:8px}
+.hero p{color:var(--fg2)}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.card h3{font-size:15px;color:var(--accent);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--fg2);margin-bottom:4px}
+.field input{width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--fg)}
+.field input:focus{outline:none;border-color:var(--accent)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.kpi{font-size:28px;font-weight:700;color:var(--accent)}
+.kpi small{font-size:14px;color:var(--fg2);font-weight:400}
+.kpi-label{font-size:11px;color:var(--fg2);margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--accent);background:var(--bg3)}
+#map9R{height:450px;border-radius:var(--radius);z-index:1;position:relative}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#1a1a1a;padding:12px 20px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .3s;z-index:1000}
+.toast.show{opacity:1}
+.wm{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.wm span{position:absolute;color:rgba(255,255,255,.03);font-size:14px;white-space:nowrap;transform:rotate(-30deg)}
+.footer{margin-left:260px;padding:24px;border-top:1px solid var(--line);color:var(--fg2);font-size:12px;display:flex;justify-content:space-between}
+.muted{color:var(--fg2);font-size:12px}
+.mt-2{margin-top:16px}
+</style>
+</head>
+<body>
+<div class="wm" id="wm"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><h1>9R LandVol Calculator</h1><div class="ver">v3.0 (9R)｜NLSC Zoning FAR Calculator Engine</div><span class="badge">Demo Beta</span></div>
+  <nav class="nav" id="nav"></nav>
+</aside>
+<div class="main" id="main">
+  <div class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="crumb" id="crumb">首頁</div>
+    <div class="spacer"></div>
+    <button class="btn" onclick="exportCSV()">Export CSV</button>
+    <button class="btn btn-accent" onclick="saveSnapshot()">Save Scenario</button>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+<div class="footer"><div>© 2026 9R LandVol Calculator｜設計規劃開發：<b style="color:var(--accent)">張書欣</b></div><div>For pre-development reference only</div></div>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const C={PING:3.3058,CONSTR:10,EX_LOBBY:0.10,EX_BALCONY:0.05,EX_MACHINE:0.03};
+const ZONE_DB=[
+{z:'住1',bcr:.60,far:1.65,cap:2.64,note:'第一種Residential區 低密度'},
+{z:'住1-1',bcr:.60,far:1.65,cap:2.64,note:'第一之一種Residential區'},
+{z:'住1-2',bcr:.60,far:2.00,cap:3.20,note:'第一之二種Residential區'},
+{z:'住2',bcr:.60,far:1.80,cap:2.88,note:'第二種Residential區'},
+{z:'住2-1',bcr:.60,far:2.00,cap:3.20,note:'第二之一種Residential區'},
+{z:'住3',bcr:.60,far:2.25,cap:3.60,note:'第三種Residential區 高層'},
+{z:'住3-1',bcr:.60,far:3.00,cap:4.80,note:'第三之一種 捷運聯開'},
+{z:'住4',bcr:.50,far:3.20,cap:5.12,note:'第四種Residential區 超高層'},
+{z:'商1',bcr:.80,far:3.20,cap:4.16,note:'第一種商業區'},
+{z:'商2',bcr:.80,far:4.00,cap:5.20,note:'第二種商業區'},
+{z:'商3',bcr:.80,far:6.00,cap:7.80,note:'第三種商業區 百貨'},
+{z:'商4',bcr:.80,far:8.00,cap:10.40,note:'第四種商業區 七期'},
+{z:'工業區',bcr:.70,far:2.10,cap:2.31,note:'丁種建築 廠房'},
+{z:'文教',bcr:.50,far:1.60,cap:1.76,note:'文教區'},
+{z:'風景',bcr:.60,far:1.20,cap:1.32,note:'風景區'}];
+let S={name:'',zone:'住1-1',areaPing:100,bcr:.60,far:1.65,farCap:2.64,roadWidth:25,
+useTransfer:true,transferCap:.40,rewardOld:.06,rewardRetreat:.10,rewardScale:.08,
+rewardSeismic:.04,rewardSmart:.06,rewardOpen:0,floorLayers:15,basementLayers:3,
+unitPing:30,landPrice:100,housePrice:50,parkingPrice:200,announceValue:90000,
+loanRatio:.5,loanRate:.02,loanYears:25,lat:24.1620,lng:120.6320};
+function calc(){
+const p=S.areaPing,gf=p*S.bcr*.965,lf=p*S.far;
+const tf=S.useTransfer?lf*S.transferCap:0;
+const rw=lf*(S.rewardOld+S.rewardRetreat+S.rewardScale+S.rewardSeismic+S.rewardSmart+S.rewardOpen);
+let mf=lf+tf+rw;const cf=p*S.farCap;if(mf>cf)mf=cf;
+const lb=mf*C.EX_LOBBY,bb=(mf+lb)*C.EX_BALCONY,mb=lf*1.6*C.EX_MACHINE;
+const ag=mf+lb+bb+mb,park=Math.ceil(ag/150/150);
+const bp=p*.84,bt=bp*S.basementLayers,bp2=Math.floor(bp/30)*S.basementLayers;
+const pc=Math.max(park,bp2),tc=bt+ag+gf*.125*S.floorLayers*.6;
+const sl=tc-pc*11,hu=Math.floor(sl/S.unitPing);
+const hr=sl*S.housePrice,pr=pc*S.parkingPrice,rev=hr+pr;
+const lc=p*S.landPrice,cc=tc*C.CONSTR;
+const tcost=S.useTransfer?(p*C.PING*S.announceValue/10000*S.transferCap*2.2):0;
+const tot=lc+cc+tcost+rev*.05,prof=rev-tot,roi=prof/tot;
+const la=lc*S.loanRatio,mr=S.loanRate/12,n=S.loanYears*12;
+const mp=la*mr*Math.pow(1+mr,n)/(Math.pow(1+mr,n)-1);
+return{gf,lf,tf,rw,mf,cf,ag,pc,tc,sl,hu,rev,lc,cc,tcost,tot,prof,roi,la,mp};
+}
+function pct(v){return(v*100).toFixed(1)+'%'}
+function w(v){return v.toFixed(1)}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+const VIEWS=[
+{g:'📊 Core Calculation',items:[{id:'dashboard',name:'01 Dashboard'},{id:'site',name:'02 Site Input'},{id:'zone',name:'03 Zoning Database'},{id:'map',name:'04 NLSC Map'},{id:'road',name:'05 Road Access'}]},
+{g:'📐 Compliance Check',items:[{id:'bcr',name:'06 BCR Calculator'},{id:'far',name:'07 FAR Calculator'},{id:'check13',name:'08 13-Point Compliance'},{id:'dig',name:'09 Excavation Ratio'},{id:'height',name:'10 Height Limit'},{id:'setback',name:'11 Setback & Building Line'}]},
+{g:'🎁 FAR Incentives',items:[{id:'reward',name:'12 Incentive Package'},{id:'transfer',name:'13 Transferable FAR (TDR)'},{id:'danger',name:'14 Urgent Urban Renewal'},{id:'urban',name:'15 Urban Renewal'}]},
+{g:'💰 Financials',items:[{id:'revenue',name:'16 Revenue'},{id:'cost',name:'17 Cost Breakdown'},{id:'fin',name:'18 Financing'},{id:'cashflow',name:'19 Cash Flow'},{id:'irr',name:'20 IRR / NPV'},{id:'sens',name:'21 Sensitivity Analysis'}]},
+{g:'📋 Planning',items:[{id:'unit',name:'22 Unit Mix Simulation'},{id:'park',name:'23 Parking Count'},{id:'pub',name:'24 Common Area Ratio'},{id:'floor',name:'25 Floor Configuration'}]},
+{g:'📑 Advanced Tools',items:[{id:'history',name:'26 History'},{id:'compare',name:'27 Compare Cases'},{id:'export',name:'28 Export Report'},{id:'tax',name:'29 Tax Estimation'},{id:'risk',name:'30 Risk Dashboard'}]}];
+let curView='dashboard';
+function renderNav(){let h='';VIEWS.forEach(g=>{h+=`<div class="nav-group">${g.g}</div>`;g.items.forEach(it=>{h+=`<a class="nav-item ${curView===it.id?'active':''}" onclick="go('${it.id}')">${it.name}</a>`})});document.getElementById('nav').innerHTML=h}
+function go(id){curView=id;renderNav();render();if(window.innerWidth<=1100)document.getElementById('sidebar').classList.add('mobile-open')}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('collapsed');document.getElementById('main').classList.toggle('expanded')}
+function R_dashboard(R){return`<div class="hero"><h2>Land not bought? Regs calculated first.</h2><p>Integrates NLSC map, BCR, FAR, TDR incentives and ROI analysis. Real-time calculation.</p></div>
+<div class="grid grid-4">
+<div class="card"><div class="kpi accent">${w(R.lf)}<small>坪</small></div><div class="kpi-label">Legal FAR</div></div>
+<div class="card"><div class="kpi">${w(R.mf)}<small>坪</small></div><div class="kpi-label">Max FAR</div></div>
+<div class="card"><div class="kpi" style="color:${R.roi>.15?'var(--ok)':'var(--warn)'}">${pct(R.roi)}</div><div class="kpi-label">ROI</div></div>
+<div class="card"><div class="kpi">${w(R.prof)}<small>萬</small></div><div class="kpi-label">Expected Net Profit</div></div></div>
+<div class="grid grid-3 mt-2">
+<div class="card"><h3>Site Parameters</h3><div class="muted">Zone：<b style="color:var(--accent)">${S.zone}</b></div><div class="muted">Area：${S.areaPing} 坪（${(S.areaPing*C.PING).toFixed(0)} ㎡）</div><div class="muted">BCR ${pct(S.bcr)}｜FAR ${pct(S.far)}</div></div>
+<div class="card"><h3>Revenue Structure</h3><div class="muted">Total Revenue：${w(R.rev)} 萬</div><div class="muted">Residential：${w(R.sl*S.housePrice)} 萬</div><div class="muted">Parking：${w(R.pc*S.parkingPrice)} 萬（${R.pc} 位）</div></div>
+<div class="card"><h3>Cost Structure</h3><div class="muted">Land：${w(R.lc)} 萬</div><div class="muted">Construction：${w(R.cc)} 萬</div><div class="muted">TDR：${w(R.tcost)} 萬</div></div></div>`}
+function R_site(R){return`<div class="hero"><h2>02 Site Input</h2><p>All fields editable, real-time calculation.</p></div>
+<div class="grid grid-2">
+<div class="card"><h3>Site Parameters</h3>
+<div class="field"><label>Project / Lot Number</label><input value="${S.name}" oninput="S.name=this.value"></div>
+<div class="field-row">
+<div class="field"><label>基地Area（坪）</label><input type="number" step="0.01" value="${S.areaPing}" oninput="S.areaPing=parseFloat(this.value)||0;render()"></div>
+<div class="field"><label>基地Area（㎡）</label><input value="${(S.areaPing*C.PING).toFixed(2)}" disabled></div></div>
+<div class="field"><label>使用Zone（至 03 切換）</label><input value="${S.zone}｜BCR${pct(S.bcr)}/FAR${pct(S.far)}" disabled></div>
+<div class="field"><label>Widest Frontage (m)</label><input type="number" value="${S.roadWidth}" oninput="S.roadWidth=parseFloat(this.value)||0;render()"></div></div>
+<div class="card"><h3>銷售單價</h3>
+<div class="field"><label>Land單價（萬/坪）</label><input type="number" value="${S.landPrice}" oninput="S.landPrice=parseFloat(this.value)||0;render()"></div>
+<div class="field"><label>Residential單價（萬/坪）</label><input type="number" value="${S.housePrice}" oninput="S.housePrice=parseFloat(this.value)||0;render()"></div>
+<div class="field"><label>Parking單價（萬/位）</label><input type="number" value="${S.parkingPrice}" oninput="S.parkingPrice=parseFloat(this.value)||0;render()"></div>
+<div class="field"><label>Declared Value (NTD/m²)</label><input type="number" value="${S.announceValue}" oninput="S.announceValue=parseFloat(this.value)||0;render()"></div></div></div>`}
+function R_zone(R){return`<div class="hero"><h2>03 Zoning Database</h2><p>Click any row to apply, recalculates instantly.</p></div>
+<div class="card">
+<input type="text" id="zq" placeholder="🔍 篩選Zone..." oninput="fz()" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--fg);margin-bottom:12px">
+<table style="table-layout:fixed;width:100%"><colgroup><col style="width:15%"><col style="width:25%"><col style="width:15%"><col style="width:15%"><col style="width:30%"></colgroup>
+<tr><th>Code</th><th>Zone</th><th>BCR率</th><th>FAR率</th><th>Notes</th></tr>
+${ZONE_DB.map(z=>`<tr class="zr" onclick="applyZone('${z.z}')" style="cursor:pointer" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''"><td><b>${z.z}</b></td><td>${z.note.split(' ')[0]}</td><td>${pct(z.bcr)}</td><td>${pct(z.far)}</td><td class="muted">${z.note}</td></tr>`).join('')}
+</table></div>`}
+function R_map(R){return`<div class="hero"><h2>04 NLSC Map</h2><p>OSM + NLSC WMS cadastral layer. Click to set site center.</p></div>
+<div class="card"><div id="map9R" style="height:450px;z-index:1;position:relative"></div>
+<div class="grid grid-3 mt-2">
+<div><div class="kpi" id="mLat" style="font-size:20px">${S.lat.toFixed(5)}</div><div class="kpi-label">Latitude</div></div>
+<div><div class="kpi" id="mLng" style="font-size:20px">${S.lng.toFixed(5)}</div><div class="kpi-label">Longitude</div></div>
+<div><div class="kpi" style="font-size:20px;color:var(--accent2)">台中市</div><div class="kpi-label">Location (demo)</div></div></div></div>`}
+function applyZone(z){const d=ZONE_DB.find(x=>x.z===z);if(!d)return;S.zone=z;S.bcr=d.bcr;S.far=d.far;S.farCap=d.cap;toast('Switched to '+z+'｜BCR'+pct(d.bcr)+'/FAR'+pct(d.far));render()}
+function fz(){const q=document.getElementById('zq').value;document.querySelectorAll('.zr').forEach(tr=>tr.style.display=tr.innerText.includes(q)?'':'')}
+function R_simple(t,d,R){return`<div class="hero"><h2>${t}</h2><p>${d}</p></div>
+<div class="grid grid-4">
+<div class="card"><div class="kpi accent">${w(R.lf)}</div><div class="kpi-label">Legal FAR(坪)</div></div>
+<div class="card"><div class="kpi">${w(R.mf)}</div><div class="kpi-label">Max FAR(坪)</div></div>
+<div class="card"><div class="kpi">${R.pc}</div><div class="kpi-label">Parking數</div></div>
+<div class="card"><div class="kpi" style="color:${R.roi>.15?'var(--ok)':'var(--warn)'}">${pct(R.roi)}</div><div class="kpi-label">ROI</div></div></div>
+<div class="card mt-2"><div class="muted">核心數值已即時連動。※依據案例差異規劃，實際以都計Zone為準。</div></div>`}
+function render(){const R=calc();let h='';
+switch(curView){
+case 'dashboard':h=R_dashboard(R);break;
+case 'site':h=R_site(R);break;
+case 'zone':h=R_zone(R);break;
+case 'map':h=R_map(R);setTimeout(initMap,200);break;
+default:
+const L={road:['05 Road Access','臨路寬度決定TDR上限'],bcr:['06 BCR Calculator','BCR率＝建築Area÷基地Area'],far:['07 FAR Calculator','FAR率＝總樓板÷基地Area'],check13:['08 13-Point Compliance','逐項檢核法定限制'],dig:['09 Excavation Ratio','地下開挖比例'],height:['10 Height Limit','高度/層數管制'],setback:['11 Setback & Building Line','退縮距離'],reward:['12 Incentive Package','危老/綠建/智慧'],transfer:['13 Transferable FAR (TDR)','TDR上限成本'],danger:['14 Urgent Urban Renewal','危老獎勵'],urban:['15 Urban Renewal','都更獎勵'],revenue:['16 Revenue','Residential+Parking'],cost:['17 Cost Breakdown','Land+Construction+TDR'],fin:['18 Financing','貸款成數利率'],cashflow:['19 Cash Flow','開發期現金流'],irr:['20 IRR / NPV','投資指標'],sens:['21 Sensitivity Analysis','售價成本±10%'],unit:['22 Unit Mix Simulation','產品組合'],park:['23 Parking Count','法定Parking'],pub:['24 Common Area Ratio','公設比'],floor:['25 Floor Configuration','地上地下層數'],history:['26 History','localStorage'],compare:['27 Compare Cases','多案例對照'],export:['28 Export Report','CSV/PDF'],tax:['29 Tax Estimation','土增稅契稅'],risk:['30 Risk Dashboard','風險指標']};
+const x=L[curView]||['功能',''];h=R_simple(x[0],x[1],R)}
+document.getElementById('content').innerHTML=h;
+const it=VIEWS.flatMap(g=>g.items).find(i=>i.id===curView);
+document.getElementById('crumb').textContent=it?it.name:'首頁'}
+let map9R=null,mkr9R=null;
+function initMap(){if(typeof L==='undefined')return;const el=document.getElementById('map9R');if(!el)return;
+if(map9R){map9R.remove();map9R=null;mkr9R=null}
+map9R=L.map(el).setView([S.lat,S.lng],16);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OSM'}).addTo(map9R);
+try{L.tileLayer.wms('https://maps.nlsc.gov.tw/WMS/Query',{layers:'LANDSECT',format:'image/png',transparent:true}).addTo(map9R)}catch(e){}
+mkr9R=L.marker([S.lat,S.lng]).addTo(map9R);
+map9R.on('click',e=>{if(mkr9R)map9R.removeLayer(mkr9R);mkr9R=L.marker(e.latlng).addTo(map9R);S.lat=e.latlng.lat;S.lng=e.latlng.lng;const a=document.getElementById('mLat');if(a)a.textContent=S.lat.toFixed(5);const b=document.getElementById('mLng');if(b)b.textContent=S.lng.toFixed(5);toast('Site center: '+S.lat.toFixed(5)+', '+S.lng.toFixed(5))});
+setTimeout(()=>map9R.invalidateSize(),200)}
+function exportCSV(){const R=calc();const rows=[['項目','數值'],['Legal FAR(坪)',R.lf],['Max FAR(坪)',R.mf],['淨利(萬)',R.prof],['ROI',R.roi],['Parking數',R.pc],['收入(萬)',R.rev]];const csv=rows.map(r=>r.join(',')).join('\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='9R_report.csv';a.click()}
+function saveSnapshot(){localStorage.setItem('9R_snapshot',JSON.stringify(S));toast('已Save Scenario')}
+(function(){const wm=document.getElementById('wm');for(let i=0;i<20;i++){const s=document.createElement('span');s.textContent='9R LandVol Calculator｜張書欣';s.style.top=(i*5)+'%';s.style.left=(i*3)+'%';wm.appendChild(s)}})();
+renderNav();render();
+</script>
+</body>
+</html>
