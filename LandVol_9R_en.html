@@ -166,26 +166,29 @@ function R_site(R){return`<div class="hero"><h2>02 基地基本輸入</h2><p>All
 <div class="field-row">
 <div class="field"><label>基地Area（坪）</label><input type="number" step="0.01" value="${S.areaPing}" oninput="S.areaPing=parseFloat(this.value)||0;render()"></div>
 <div class="field"><label>基地Area（㎡）</label><input value="${(S.areaPing*C.PING).toFixed(2)}" disabled></div></div>
-<div class="field"><label>使用Zone（至 03 切換）</label><input value="${S.zone}｜BCR${pct(S.bcr)}/FAR${pct(S.far)}" disabled></div>
+<div class="field"><label>使用Zone（直接選擇，即時換算）</label>
+<select onchange="applyZone(this.value)" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--fg)">
+${ZONE_DB.map(z=>`<option value="${z.z}" ${S.zone===z.z?'selected':''}>${z.z}｜BCR${pct(z.bcr)} / FAR${pct(z.far)}</option>`).join('')}
+</select></div>
 <div class="field"><label>Frontage (m)</label><input type="number" value="${S.roadWidth}" oninput="S.roadWidth=parseFloat(this.value)||0;render()"></div></div>
 <div class="card"><h3>銷售單價</h3>
 <div class="field"><label>Land單價（萬/坪）</label><input type="number" value="${S.landPrice}" oninput="S.landPrice=parseFloat(this.value)||0;render()"></div>
 <div class="field"><label>Residential單價（萬/坪）</label><input type="number" value="${S.housePrice}" oninput="S.housePrice=parseFloat(this.value)||0;render()"></div>
 <div class="field"><label>Parking單價（萬/位）</label><input type="number" value="${S.parkingPrice}" oninput="S.parkingPrice=parseFloat(this.value)||0;render()"></div>
 <div class="field"><label>Declared Value (NTD/m²)</label><input type="number" value="${S.announceValue}" oninput="S.announceValue=parseFloat(this.value)||0;render()"></div></div></div>`}
-function R_zone(R){return`<div class="hero"><h2>03 使用Zone資料庫</h2><p>Click to apply, recalculates instantly.</p></div>
+function R_zone(R){return`<div class="hero"><h2>03 使用Zone資料庫</h2><p>點選任一列即帶入，全頁即時重算。</p></div>
 <div class="card">
 <input type="text" id="zq" placeholder="🔍 篩選Zone..." oninput="fz()" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--fg);margin-bottom:12px">
 <table style="table-layout:fixed;width:100%"><colgroup><col style="width:15%"><col style="width:25%"><col style="width:15%"><col style="width:15%"><col style="width:30%"></colgroup>
-<tr><th>Code</th><th>Zone</th><th>BCR率</th><th>FAR率</th><th>Notes</th></tr>
+<tr><th>代碼</th><th>Zone</th><th>BCR率</th><th>FAR率</th><th>備註</th></tr>
 ${ZONE_DB.map(z=>`<tr class="zr" onclick="applyZone('${z.z}')" style="cursor:pointer" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''"><td><b>${z.z}</b></td><td>${z.note.split(' ')[0]}</td><td>${pct(z.bcr)}</td><td>${pct(z.far)}</td><td class="muted">${z.note}</td></tr>`).join('')}
 </table></div>`}
-function R_map(R){return`<div class="hero"><h2>04 國土測繪地圖</h2><p>OSM + NLSC WMS. Click to set center.</p></div>
+function R_map(R){return`<div class="hero"><h2>04 國土測繪地圖</h2><p>OSM + 國土測繪 WMS 地籍圖層。點擊設定基地中心。</p></div>
 <div class="card"><div id="map9R" style="height:450px;z-index:1;position:relative"></div>
 <div class="grid grid-3 mt-2">
-<div><div class="kpi" id="mLat" style="font-size:20px">${S.lat.toFixed(5)}</div><div class="kpi-label">Lat</div></div>
-<div><div class="kpi" id="mLng" style="font-size:20px">${S.lng.toFixed(5)}</div><div class="kpi-label">Lng</div></div>
-<div><div class="kpi" style="font-size:20px;color:var(--accent2)">台中市</div><div class="kpi-label">Location (demo)</div></div></div></div>`}
+<div><div class="kpi" id="mLat" style="font-size:20px">${S.lat.toFixed(5)}</div><div class="kpi-label">緯度</div></div>
+<div><div class="kpi" id="mLng" style="font-size:20px">${S.lng.toFixed(5)}</div><div class="kpi-label">經度</div></div>
+<div><div class="kpi" style="font-size:20px;color:var(--accent2)">台中市</div><div class="kpi-label">定位（示意）</div></div></div></div>`}
 function applyZone(z){const d=ZONE_DB.find(x=>x.z===z);if(!d)return;S.zone=z;S.bcr=d.bcr;S.far=d.far;S.farCap=d.cap;toast('已切換 '+z+'｜BCR'+pct(d.bcr)+'/FAR'+pct(d.far));render()}
 function fz(){const q=document.getElementById('zq').value;document.querySelectorAll('.zr').forEach(tr=>tr.style.display=tr.innerText.includes(q)?'':'')}
 function R_dynamic(t,d,R){
@@ -260,7 +263,7 @@ function R_dynamic(t,d,R){
   <tr><th>Item</th><th>Value / Note</th></tr>
   ${det.map(([k,v])=>`<tr><td>${k}</td><td><b style="color:var(--accent)">${v}</b></td></tr>`).join('')}
   </table>
-  <div class="muted mt-2">* Per case; verify with official zoning.</div></div>`
+  <div class="muted mt-2">※依據案例差異規劃，實際以都市計畫與建管審查為準。</div></div>`
 }
 function render(){const R=calc();let h='';
 switch(curView){
@@ -269,7 +272,7 @@ case 'site':h=R_site(R);break;
 case 'zone':h=R_zone(R);break;
 case 'map':h=R_map(R);setTimeout(initMap,200);break;
 default:
-const L={dashboard:['01 Dashboard','Overview'],site:['02 Site Input','Site params'],zone:['03 Zoning DB','Lookup'],map:['04 NLSC Map','Interactive map'],road:['05 Road Access','Frontage'],landpv:['06 Land DCF','Discounted cash flow'],faro:['07 FAR Optimum','Best incentive combo'],bep:['08 Break-Even','Break-even point'],payback:['09 Payback Period','Payback years'],radar:['10 ROI Radar','Multi-dimensional radar'],bcr:['11 BCR Calc','Building coverage ratio'],far:['12 FAR Calc','Floor area ratio'],check13:['13 13-Point Check','Compliance checklist'],dig:['14 Excavation','Basement excavation'],height:['15 Height Limit','Height control'],setback:['16 Setback','Building line setback'],front:['17 Front/Rear Yard','Front/rear yard'],blin:['18 Building Line','Designated building line'],opencover:['19 Open Space Ratio','Open coverage'],sun:['20 Sunlight','Sunlight analysis'],eia:['21 EIA Check','Environmental impact'],reward:['22 Incentive Pack','All incentives'],transfer:['23 TDR','Transferable development rights'],danger:['24 Urgent Renewal','Urgent urban renewal act'],urban:['25 Urban Renewal','Urban renewal act'],green:['26 Green Building','EEWH certification'],smart:['27 Smart Building','Smart building'],urtdr:['28 URT TDR','URT TDR'],landscape:['29 Landscape','Landscape incentive'],disaster:['30 Disaster Resilience','Disaster design'],revenue:['31 Revenue','Residential + parking + retail'],cost:['32 Cost Breakdown','Land + construction + marketing'],fin:['33 Financing','Loan ratio / rate / monthly'],cashflow:['34 Cash Flow','Development cash flow'],irr:['35 IRR/NPV','Investment metrics'],sens:['36 Sensitivity','Price/cost ±10%'],marketing:['37 Marketing Fee','Advertising + management'],lvt:['38 Land VAT','Land value increment tax'],deedtax:['39 Deed Tax','Deed tax'],vat:['40 Business Tax','5% business tax'],margin:['41 Profit Margin','Gross margin'],unit:['42 Unit Mix','Unit composition'],park:['43 Parking','Legal parking count'],pub:['44 Common Area','Common area ratio'],floor:['45 Floor Config','Above/below floors'],shop:['46 Retail Floor','Ground-floor retail'],tower:['47 Tower Count','Single/double tower'],elev:['48 Elevators','Elevator count'],lobby:['49 Lobby','Lobby design'],balcony:['50 Balcony','Balcony design'],history:['51 History','localStorage records'],compare:['52 Compare','Multi-case comparison'],export:['53 Export','CSV export'],tax:['54 Tax','Land VAT + deed'],risk:['55 Risk Gauge','Risk indicators'],matrix:['56 Sensitivity Matrix','Two-factor matrix'],scenario:['57 Scenarios','Multiple scenarios'],report:['58 Print Report','Print'],checklist:['59 Checklist','Building permit checklist'],faq:['60 FAQ','Q&A'];
+const L={dashboard:['01 儀表板','總覽'],site:['02 基地輸入','Site Parameters'],zone:['03 Zone資料庫','Zone查詢'],map:['04 國土測繪地圖','互動地圖'],road:['05 臨路條件','臨路寬度'],landpv:['06 Land折現值','DCF折現'],faro:['07 FAR獎勵最佳化','最佳獎勵組合'],bep:['08 損益兩平分析','損益平衡點'],payback:['09 現金回收年限','回收期'],radar:['10 投報率雷達','多維度雷達圖'],bcr:['11 BCR率試算','BCR率法規'],far:['12 FAR率試算','FAR率法規'],check13:['13 13項法規檢核','逐項檢核'],dig:['14 開挖率檢核','開挖比例'],height:['15 高度上限檢核','高度管制'],setback:['16 退縮與建築線','退縮距離'],front:['17 前後院退縮','前後院退縮'],blin:['18 建築線指定','建築線'],opencover:['19 空地率檢核','空地率'],sun:['20 日照影響','日照分析'],eia:['21 環評檢核','環境影響評估'],reward:['22 獎勵組合','各項獎勵'],transfer:['23 FAR移轉','TDR'],danger:['24 危老重建','危老條例'],urban:['25 都市更新','都更條例'],green:['26 綠建築分級','綠建築EEWH'],smart:['27 智慧建築','智慧建築'],urtdr:['28 都更TDR','都更TDR'],landscape:['29 環境景觀','景觀獎勵'],disaster:['30 防災設施','防災設計'],revenue:['31 銷售收入','ResidentialParking店面'],cost:['32 成本拆解','LandConstruction管銷'],fin:['33 融資試算','貸款利率月付'],cashflow:['34 現金流量','開發期現金流'],irr:['35 IRR/NPV','投資指標'],sens:['36 敏感性分析','售價成本±10%'],marketing:['37 管銷費用','廣告管理費'],lvt:['38 土增稅','Land增值稅'],deedtax:['39 契稅','房屋契稅'],vat:['40 營業稅','5%營業稅'],margin:['41 利潤邊際','毛利率'],unit:['42 戶數坪數模擬','產品組合'],park:['43 停Parking計算','法定Parking'],pub:['44 公設比試算','公設比'],floor:['45 樓層配置','地上地下層數'],shop:['46 店面樓層','一樓店面'],tower:['47 棟數配置','單棟/雙棟'],elev:['48 電梯數量','電梯配置'],lobby:['49 梯廳配置','梯廳'],balcony:['50 陽台設計','陽台'],history:['51 歷史紀錄','localStorage'],compare:['52 案例比較','多案例對照'],export:['53 匯出報表','CSV'],tax:['54 稅費試算','土增契稅'],risk:['55 風險儀表','風險指標'],matrix:['56 敏感性矩陣','雙因子矩陣'],scenario:['57 情境儲存','多情境'],report:['58 列印報告','列印'],checklist:['59 審查清單','建照審查'],faq:['60 常見問答','Q&A']};
 const x=L[curView]||['功能',''];h=R_dynamic(x[0],x[1],R)}
 document.getElementById('content').innerHTML=h;
 const it=VIEWS.flatMap(g=>g.items).find(i=>i.id===curView);

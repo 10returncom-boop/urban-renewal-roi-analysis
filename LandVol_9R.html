@@ -166,7 +166,10 @@ function R_site(R){return`<div class="hero"><h2>02 基地基本輸入</h2><p>所
 <div class="field-row">
 <div class="field"><label>基地面積（坪）</label><input type="number" step="0.01" value="${S.areaPing}" oninput="S.areaPing=parseFloat(this.value)||0;render()"></div>
 <div class="field"><label>基地面積（㎡）</label><input value="${(S.areaPing*C.PING).toFixed(2)}" disabled></div></div>
-<div class="field"><label>使用分區（至 03 切換）</label><input value="${S.zone}｜建蔽${pct(S.bcr)}/容積${pct(S.far)}" disabled></div>
+<div class="field"><label>使用分區（直接選擇，即時換算）</label>
+<select onchange="applyZone(this.value)" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--fg)">
+${ZONE_DB.map(z=>`<option value="${z.z}" ${S.zone===z.z?'selected':''}>${z.z}｜建蔽${pct(z.bcr)} / 容積${pct(z.far)}</option>`).join('')}
+</select></div>
 <div class="field"><label>最寬臨路（m）</label><input type="number" value="${S.roadWidth}" oninput="S.roadWidth=parseFloat(this.value)||0;render()"></div></div>
 <div class="card"><h3>銷售單價</h3>
 <div class="field"><label>土地單價（萬/坪）</label><input type="number" value="${S.landPrice}" oninput="S.landPrice=parseFloat(this.value)||0;render()"></div>
