@@ -681,9 +681,21 @@ function loadCase(k, btn){
 function applyZone(row){
   const z=row.dataset.zone, b=parseFloat(row.dataset.bcr), f=parseFloat(row.dataset.far);
   S.zone=z; S.bcr=b; S.far=f;
-  // farCap 暫定為 far*1.6（一般獎勵上限）
-  S.farCap=Math.round(f*1.6*100)/100;
-  toast('已帶入：'+z+'（建蔽率'+(b*100)+'% / 容積率'+(f*100)+'%）');
+  // 依分區類型自動給預設獎勵與 farCap
+  const isResidential = z.startsWith('住');
+  const isCommercial = z.startsWith('商');
+  const isIndustrial = (z==='工業區'||z==='特工');
+  // farCap：住宅區 far*1.6（危老40%+容移40%），商業區 far*1.3，工業區 far*1.1
+  if(isResidential) S.farCap=Math.round(f*1.6*100)/100;
+  else if(isCommercial) S.farCap=Math.round(f*1.3*100)/100;
+  else S.farCap=Math.round(f*1.1*100)/100;
+  // 危老獎勵：只有住宅區預設開啟，商工預設關閉
+  if(isResidential){ S.rewardOldBuilding=0.06; S.rewardRetreat=0.10; S.rewardScale=0.08; S.rewardSeismic=0.04; S.rewardSmart=0.06; }
+  else { S.rewardOldBuilding=0; S.rewardRetreat=0; S.rewardScale=0; S.rewardSeismic=0; S.rewardSmart=0; }
+  // 容移：住宅區預設開啟（臨路≥25m），其他關閉
+  S.useTransfer = isResidential;
+  S.transferCap = isResidential ? 0.40 : 0;
+  toast('已切換為 '+z+'｜建蔽率'+(b*100)+'% / 容積率'+(f*100)+'%／上限'+(S.farCap*100)+'%');
   render();
 }
 function filterZoneTable(){
@@ -761,7 +773,24 @@ VIEW_BUILDERS.f01 = R=>`
     </div>
     <div class="field-row">
       <div class="field"><label>使用分區</label>
-        <select data-bind="zone"><option ${S.zone==='住1-1'?'selected':''}>住1-1</option><option ${S.zone==='住2'?'selected':''}>住2</option><option>住3</option><option>商3</option><option>工業區</option></select>
+        <select data-bind="zone">
+          <option ${S.zone==='住1'?'selected':''}>住1</option>
+          <option ${S.zone==='住1-1'?'selected':''}>住1-1</option>
+          <option ${S.zone==='住1-2'?'selected':''}>住1-2</option>
+          <option ${S.zone==='住2'?'selected':''}>住2</option>
+          <option ${S.zone==='住2-1'?'selected':''}>住2-1</option>
+          <option ${S.zone==='住3'?'selected':''}>住3</option>
+          <option ${S.zone==='住3-1'?'selected':''}>住3-1</option>
+          <option ${S.zone==='住4'?'selected':''}>住4</option>
+          <option ${S.zone==='商1'?'selected':''}>商1</option>
+          <option ${S.zone==='商2'?'selected':''}>商2</option>
+          <option ${S.zone==='商3'?'selected':''}>商3</option>
+          <option ${S.zone==='商4'?'selected':''}>商4</option>
+          <option ${S.zone==='工業區'?'selected':''}>工業區</option>
+          <option ${S.zone==='特工'?'selected':''}>特工</option>
+          <option ${S.zone==='文教'?'selected':''}>文教</option>
+          <option ${S.zone==='風景'?'selected':''}>風景</option>
+        </select>
       </div>
       <div class="field"><label>基地位置</label><input value="${S.road}" disabled></div>
     </div>
