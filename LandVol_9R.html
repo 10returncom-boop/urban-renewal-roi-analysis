@@ -127,12 +127,24 @@ function pct(v){return(v*100).toFixed(1)+'%'}
 function w(v){return v.toFixed(1)}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
 const VIEWS=[
-{g:'📊 核心試算',items:[{id:'dashboard',name:'01 儀表板總覽'},{id:'site',name:'02 基地基本輸入'},{id:'zone',name:'03 使用分區資料庫'},{id:'map',name:'04 國土測繪地圖'},{id:'road',name:'05 臨路條件'}]},
-{g:'📐 法規檢核',items:[{id:'bcr',name:'06 建蔽率試算'},{id:'far',name:'07 容積率試算'},{id:'check13',name:'08 13項法規檢核'},{id:'dig',name:'09 開挖率檢核'},{id:'height',name:'10 高度上限檢核'},{id:'setback',name:'11 退縮與建築線'}]},
-{g:'🎁 容積獎勵',items:[{id:'reward',name:'12 獎勵組合'},{id:'transfer',name:'13 容積移轉'},{id:'danger',name:'14 危老重建'},{id:'urban',name:'15 都市更新'}]},
-{g:'💰 財務試算',items:[{id:'revenue',name:'16 銷售收入'},{id:'cost',name:'17 成本拆解'},{id:'fin',name:'18 融資試算'},{id:'cashflow',name:'19 現金流量'},{id:'irr',name:'20 IRR/NPV'},{id:'sens',name:'21 敏感性分析'}]},
-{g:'📋 規劃設計',items:[{id:'unit',name:'22 戶數坪數模擬'},{id:'park',name:'23 停車位計算'},{id:'pub',name:'24 公設比試算'},{id:'floor',name:'25 樓層配置'}]},
-{g:'📑 進階工具',items:[{id:'history',name:'26 歷史紀錄'},{id:'compare',name:'27 案例比較'},{id:'export',name:'28 匯出報表'},{id:'tax',name:'29 稅費試算'},{id:'risk',name:'30 風險儀表'}]}];
+{g:'📊 核心試算',items:[
+{id:'dashboard',name:'01 儀表板總覽'},{id:'site',name:'02 基地基本輸入'},{id:'zone',name:'03 使用分區資料庫'},{id:'map',name:'04 國土測繪地圖'},{id:'road',name:'05 臨路條件'},
+{id:'landpv',name:'06 土地折現值'},{id:'faro',name:'07 容積獎勵最佳化'},{id:'bep',name:'08 損益兩平分析'},{id:'payback',name:'09 現金回收年限'},{id:'radar',name:'10 投報率雷達'}]},
+{g:'📐 法規檢核',items:[
+{id:'bcr',name:'11 建蔽率試算'},{id:'far',name:'12 容積率試算'},{id:'check13',name:'13 13項法規檢核'},{id:'dig',name:'14 開挖率檢核'},{id:'height',name:'15 高度上限檢核'},{id:'setback',name:'16 退縮與建築線'},
+{id:'front',name:'17 前後院退縮'},{id:'blin',name:'18 建築線指定'},{id:'opencover',name:'19 空地率檢核'},{id:'sun',name:'20 日照影響'},{id:'eia',name:'21 環評檢核'}]},
+{g:'🎁 容積獎勵',items:[
+{id:'reward',name:'22 獎勵組合'},{id:'transfer',name:'23 容積移轉'},{id:'danger',name:'24 危老重建'},{id:'urban',name:'25 都市更新'},
+{id:'green',name:'26 綠建築分級'},{id:'smart',name:'27 智慧建築'},{id:'urtdr',name:'28 都更容移'},{id:'landscape',name:'29 環境景觀'},{id:'disaster',name:'30 防災設施'}]},
+{g:'💰 財務試算',items:[
+{id:'revenue',name:'31 銷售收入'},{id:'cost',name:'32 成本拆解'},{id:'fin',name:'33 融資試算'},{id:'cashflow',name:'34 現金流量'},{id:'irr',name:'35 IRR/NPV'},{id:'sens',name:'36 敏感性分析'},
+{id:'marketing',name:'37 管銷費用'},{id:'lvt',name:'38 土增稅'},{id:'deedtax',name:'39 契稅'},{id:'vat',name:'40 營業稅'},{id:'margin',name:'41 利潤邊際'}]},
+{g:'📋 規劃設計',items:[
+{id:'unit',name:'42 戶數坪數模擬'},{id:'park',name:'43 停車位計算'},{id:'pub',name:'44 公設比試算'},{id:'floor',name:'45 樓層配置'},
+{id:'shop',name:'46 店面樓層'},{id:'tower',name:'47 棟數配置'},{id:'elev',name:'48 電梯數量'},{id:'lobby',name:'49 梯廳配置'},{id:'balcony',name:'50 陽台設計'}]},
+{g:'📑 進階工具',items:[
+{id:'history',name:'51 歷史紀錄'},{id:'compare',name:'52 案例比較'},{id:'export',name:'53 匯出報表'},{id:'tax',name:'54 稅費試算'},{id:'risk',name:'55 風險儀表'},
+{id:'matrix',name:'56 敏感性矩陣'},{id:'scenario',name:'57 情境儲存'},{id:'report',name:'58 列印報告'},{id:'checklist',name:'59 審查清單'},{id:'faq',name:'60 常見問答'}]}];
 let curView='dashboard';
 function renderNav(){let h='';VIEWS.forEach(g=>{h+=`<div class="nav-group">${g.g}</div>`;g.items.forEach(it=>{h+=`<a class="nav-item ${curView===it.id?'active':''}" onclick="go('${it.id}')">${it.name}</a>`})});document.getElementById('nav').innerHTML=h}
 function go(id){curView=id;renderNav();render();if(window.innerWidth<=1100)document.getElementById('sidebar').classList.add('mobile-open')}
@@ -190,7 +202,7 @@ case 'site':h=R_site(R);break;
 case 'zone':h=R_zone(R);break;
 case 'map':h=R_map(R);setTimeout(initMap,200);break;
 default:
-const L={road:['05 臨路條件','臨路寬度決定容移上限'],bcr:['06 建蔽率試算','建蔽率＝建築面積÷基地面積'],far:['07 容積率試算','容積率＝總樓板÷基地面積'],check13:['08 13項法規檢核','逐項檢核法定限制'],dig:['09 開挖率檢核','地下開挖比例'],height:['10 高度上限檢核','高度/層數管制'],setback:['11 退縮與建築線','退縮距離'],reward:['12 獎勵組合','危老/綠建/智慧'],transfer:['13 容積移轉','容移上限成本'],danger:['14 危老重建','危老獎勵'],urban:['15 都市更新','都更獎勵'],revenue:['16 銷售收入','住宅+車位'],cost:['17 成本拆解','土地+營建+容移'],fin:['18 融資試算','貸款成數利率'],cashflow:['19 現金流量','開發期現金流'],irr:['20 IRR/NPV','投資指標'],sens:['21 敏感性分析','售價成本±10%'],unit:['22 戶數坪數模擬','產品組合'],park:['23 停車位計算','法定車位'],pub:['24 公設比試算','公設比'],floor:['25 樓層配置','地上地下層數'],history:['26 歷史紀錄','localStorage'],compare:['27 案例比較','多案例對照'],export:['28 匯出報表','CSV/PDF'],tax:['29 稅費試算','土增稅契稅'],risk:['30 風險儀表','風險指標']};
+const L={dashboard:['01 儀表板','總覽'],site:['02 基地輸入','基地參數'],zone:['03 分區資料庫','分區查詢'],map:['04 國土測繪地圖','互動地圖'],road:['05 臨路條件','臨路寬度'],landpv:['06 土地折現值','DCF折現'],faro:['07 容積獎勵最佳化','最佳獎勵組合'],bep:['08 損益兩平分析','損益平衡點'],payback:['09 現金回收年限','回收期'],radar:['10 投報率雷達','多維度雷達圖'],bcr:['11 建蔽率試算','建蔽率法規'],far:['12 容積率試算','容積率法規'],check13:['13 13項法規檢核','逐項檢核'],dig:['14 開挖率檢核','開挖比例'],height:['15 高度上限檢核','高度管制'],setback:['16 退縮與建築線','退縮距離'],front:['17 前後院退縮','前後院退縮'],blin:['18 建築線指定','建築線'],opencover:['19 空地率檢核','空地率'],sun:['20 日照影響','日照分析'],eia:['21 環評檢核','環境影響評估'],reward:['22 獎勵組合','各項獎勵'],transfer:['23 容積移轉','TDR'],danger:['24 危老重建','危老條例'],urban:['25 都市更新','都更條例'],green:['26 綠建築分級','綠建築EEWH'],smart:['27 智慧建築','智慧建築'],urtdr:['28 都更容移','都更容移'],landscape:['29 環境景觀','景觀獎勵'],disaster:['30 防災設施','防災設計'],revenue:['31 銷售收入','住宅車位店面'],cost:['32 成本拆解','土地營建管銷'],fin:['33 融資試算','貸款利率月付'],cashflow:['34 現金流量','開發期現金流'],irr:['35 IRR/NPV','投資指標'],sens:['36 敏感性分析','售價成本±10%'],marketing:['37 管銷費用','廣告管理費'],lvt:['38 土增稅','土地增值稅'],deedtax:['39 契稅','房屋契稅'],vat:['40 營業稅','5%營業稅'],margin:['41 利潤邊際','毛利率'],unit:['42 戶數坪數模擬','產品組合'],park:['43 停車位計算','法定車位'],pub:['44 公設比試算','公設比'],floor:['45 樓層配置','地上地下層數'],shop:['46 店面樓層','一樓店面'],tower:['47 棟數配置','單棟/雙棟'],elev:['48 電梯數量','電梯配置'],lobby:['49 梯廳配置','梯廳'],balcony:['50 陽台設計','陽台'],history:['51 歷史紀錄','localStorage'],compare:['52 案例比較','多案例對照'],export:['53 匯出報表','CSV'],tax:['54 稅費試算','土增契稅'],risk:['55 風險儀表','風險指標'],matrix:['56 敏感性矩陣','雙因子矩陣'],scenario:['57 情境儲存','多情境'],report:['58 列印報告','列印'],checklist:['59 審查清單','建照審查'],faq:['60 常見問答','Q&A']};
 const x=L[curView]||['功能',''];h=R_simple(x[0],x[1],R)}
 document.getElementById('content').innerHTML=h;
 const it=VIEWS.flatMap(g=>g.items).find(i=>i.id===curView);
