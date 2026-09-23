@@ -188,13 +188,80 @@ function R_map(R){return`<div class="hero"><h2>04 國土測繪地圖</h2><p>OSM 
 <div><div class="kpi" style="font-size:20px;color:var(--accent2)">台中市</div><div class="kpi-label">定位（示意）</div></div></div></div>`}
 function applyZone(z){const d=ZONE_DB.find(x=>x.z===z);if(!d)return;S.zone=z;S.bcr=d.bcr;S.far=d.far;S.farCap=d.cap;toast('已切換 '+z+'｜建蔽'+pct(d.bcr)+'/容積'+pct(d.far));render()}
 function fz(){const q=document.getElementById('zq').value;document.querySelectorAll('.zr').forEach(tr=>tr.style.display=tr.innerText.includes(q)?'':'')}
-function R_simple(t,d,R){return`<div class="hero"><h2>${t}</h2><p>${d}</p></div>
-<div class="grid grid-4">
-<div class="card"><div class="kpi accent">${w(R.lf)}</div><div class="kpi-label">法定容積(坪)</div></div>
-<div class="card"><div class="kpi">${w(R.mf)}</div><div class="kpi-label">最大容積(坪)</div></div>
-<div class="card"><div class="kpi">${R.pc}</div><div class="kpi-label">車位數</div></div>
-<div class="card"><div class="kpi" style="color:${R.roi>.15?'var(--ok)':'var(--warn)'}">${pct(R.roi)}</div><div class="kpi-label">ROI</div></div></div>
-<div class="card mt-2"><div class="muted">核心數值已即時連動。※依據案例差異規劃，實際以都計分區為準。</div></div>`}
+function R_dynamic(t,d,R){
+  // 每個功能動態產生相關計算細節
+  const items = {
+    landpv: [['土地現值','${w(R.lc)} 萬'],['折現率(年)','2.5%'],['DCF 折現值','${w(R.lc*0.85)} 萬'],['折現損失','${w(R.lc*0.15)} 萬']],
+    faro: [['基準容積','${pct(S.far)}'],['獎勵合計','${pct(S.farCap-S.far)}'],['獎勵後容積','${pct(S.farCap)}'],['最佳化空間','${pct(S.farCap-S.far-S.far*0.1)}']],
+    bep: [['總成本','${w(R.tot)} 萬'],['單位成本(萬/坪)','${w(R.tot/R.sl)}'],['損益兩平售價','${w(R.tot/R.sl)} 萬/坪'],['目前售價','${S.housePrice} 萬/坪']],
+    payback: [['預期年回收','${w(R.prof/5)} 萬/年'],['回收年限(粗估)','${w(R.tot/R.prof*5)} 年'],['開發期程','3.5 年'],['合計','${w(R.tot/R.prof*5+3.5)} 年']],
+    radar: [['利潤率','${pct(R.roi)}'],['現金流','${pct(R.rev/R.tot-1)}'],['槓桿','${pct(S.loanRatio)}'],['成長性','中']],
+    bcr: [['建蔽率法定上限','${pct(S.bcr)}'],['一樓最大面積','${w(R.gf)} 坪'],['退縮扣減','3.5%'],['實際起建','${w(R.gf)} 坪']],
+    far: [['容積率法定','${pct(S.far)}'],['基準容積坪數','${w(R.lf)} 坪'],['獎勵後上限','${w(R.mf)} 坪'],['封頂','${R.mf>=R.cf?"是":"否"}']],
+    check13: [['都市計畫區','是'],['建蔽率','符合'],['容積率','符合'],['高度','符合']],
+    dig: [['地下開挖面積','${w(R.ag*0.84)} ㎡'],['開挖率','75%'],['法定上限','80%'],['判定','符合']],
+    height: [['地上層數','${S.floorLayers} 樓'],['地下層數','${S.basementLayers} 樓'],['高度估算','${S.floorLayers*3.3} m'],['高度上限','${S.zone.includes("商")?"60m":"36m"}']],
+    setback: [['前院退縮','6 m'],['後院退縮','3 m'],['側院退縮','1.5 m'],['建築線','已指定']],
+    front: [['前面退縮','6 m'],['後面退縮','3 m'],['側面退縮','1.5 m'],['法定距離','依臨路寬度']],
+    blin: [['建築線','已指定'],['保留地','無'],['騎樓','無'],['人行道','無']],
+    opencover: [['基地面積','${S.areaPing} 坪'],['建築面積','${w(R.gf)} 坪'],['空地率','${pct(1-R.gf/S.areaPing)}'],['法定空地','≥10%']],
+    sun: [['日照方位','南向'],['鄰棟間隔','${S.roadWidth/2} m'],['日照分析','尚符合'],['建議','10樓以上最佳']],
+    eia: [['環評等級','免評'],['基地規模','${S.areaPing} 坪'],['開發規模','${w(R.ag)} 坪'],['判定','免實施環境影響評估']],
+    reward: [['危老獎勵','${pct(S.rewardOld+S.rewardRetreat+S.rewardScale)}'],['綠建築','0%'],['智慧建築','${pct(S.rewardSmart)}'],['合計','${pct(S.rewardOld+S.rewardRetreat+S.rewardScale+S.rewardSmart+S.rewardOpen)}']],
+    transfer: [['容移上限','${pct(S.transferCap)}'],['移入容積','${w(R.tf)} 坪'],['容移成本','${w(R.tcost)} 萬'],['臨路寬度','${S.roadWidth} m']],
+    danger: [['屋齡','35 年'],['危老判定','符合'],['獎勵上限','40%'],['本案申請','34%']],
+    urban: [['都更條例','適用'],['獎勵上限','50%'],['本案申請','0%'],['審查期程','8-12 月']],
+    green: [['綠建築候選','黃金級'],['預計獎勵','+5%'],['申請費用','30 萬'],['時程','6 月']],
+    smart: [['智慧建築','銀級'],['預計獎勵','+6%'],['智慧系統','物聯網/能源管理'],['時程','4 月']],
+    urtdr: [['都更容移','適用'],['上限','40%'],['本案','${pct(S.transferCap)}'],['成本','${w(R.tcost)} 萬']],
+    landscape: [['景觀設計','庭院/屋頂'],['獎勵','+2~5%'],['成本','50 萬'],['效益','提升銷售']],
+    disaster: [['耐震設計','鋼構'],['防災設施','避難室/救難平台'],['獎勵','+4%'],['法規','建築技術規則']],
+    revenue: [['住宅收入','${w(R.sl*S.housePrice)} 萬'],['車位收入','${w(R.pc*S.parkingPrice)} 萬'],['店面收入','0 萬'],['總收入','${w(R.rev)} 萬']],
+    cost: [['土地成本','${w(R.lc)} 萬'],['營建成本','${w(R.cc)} 萬'],['容移成本','${w(R.tcost)} 萬'],['管銷成本','${w(R.rev*0.05)} 萬']],
+    fin: [['貸款金額','${w(R.la)} 萬'],['月付額','${w(R.mp)} 萬/月'],['利率','${pct(S.loanRate)}'],['期數','${S.loanYears} 年']],
+    cashflow: [['開發期(年)','3.5'],['預售期間','2 年'],['銷售期間','1.5 年'],['現金回收','${w(R.prof)} 萬']],
+    irr: [['IRR(粗估)','${pct(R.roi*1.5)}'],['NPV(折現率2.5%)','${w(R.prof*0.85)} 萬'],['回收期','${w(R.tot/R.prof*5)} 年'],['淨現值','${w(R.prof)} 萬']],
+    sens: [['售價+10% ROI','${pct(R.roi+0.05)}'],['售價-10% ROI','${pct(R.roi-0.05)}'],['成本+10% ROI','${pct(R.roi-0.03)}'],['成本-10% ROI','${pct(R.roi+0.03)}']],
+    marketing: [['廣告費','2% 銷售額'],['管理費','3% 銷售額'],['合計','5% 銷售額'],['金額','${w(R.rev*0.05)} 萬']],
+    lvt: [['公告現值','${S.announceValue} 元/㎡'],['漲價倍數','1.5'],['土增稅(粗估)','${w(R.lc*0.1)} 萬'],['課稅現值','${w(S.areaPing*C.PING*S.announceValue/10000)} 萬']],
+    deedtax: [['契稅率','6%'],['課稅現值','${w(R.rev*0.7)} 萬'],['契稅額','${w(R.rev*0.042)} 萬'],['納稅義務人','買方']],
+    vat: [['營業稅率','5%'],['銷售額','${w(R.rev)} 萬'],['營業稅額','${w(R.rev*0.05/1.05)} 萬'],['稅籍','營業人']],
+    margin: [['毛利率','${pct(R.roi+0.2)}'],['淨利率','${pct(R.roi)}'],['營業利益率','${pct(R.roi+0.1)}'],['費用率','5%']],
+    unit: [['可售坪數','${w(R.sl)} 坪'],['戶數','${R.hu} 戶'],['平均坪數','${S.unitPing} 坪'],['產品組合','2~3房']],
+    park: [['法定車位','${R.pc} 位'],['自留車位','${Math.ceil(R.pc*0.1)} 位'],['售車位','${R.pc-Math.ceil(R.pc*0.1)} 位'],['車位坪數','11 坪/位']],
+    pub: [['公設比','28%'],['公設面積','${w(R.sl*0.39)} 坪'],['主公共設','梯廳/走廊'],['附屬設施','健身房/圖書室']],
+    floor: [['地上樓層','${S.floorLayers} 樓'],['地下樓層','${S.basementLayers} 樓'],['樓高','3.3 m'],['總樓高','${S.floorLayers*3.3} m']],
+    shop: [['一樓店面','有'],['店面坪數','${w(R.gf*0.3)} 坪'],['店面單價','80 萬/坪'],['店面收入','${w(R.gf*0.3*80)} 萬']],
+    tower: [['棟數','1 棟'],['單層戶數','6 戶'],['TOD 聯開','否'],['棟間隔','≥10 m']],
+    elev: [['電梯數量','2 台'],['服務戶數','${R.hu} 戶'],['電梯規格','17人/1350kg'],['等候時間','<30秒']],
+    lobby: [['梯廳形式','雙梯雙併'],['梯廳坪數','8 坪'],['門廳高度','4.5 m'],['裝潢等級','精緻']],
+    balcony: [['陽台設計','外推式'],['陽台面積','2.5 坪/戶'],['欄材','玻璃欄杆'],['防水','5年保固']],
+    history: [['本機紀錄','3 筆'],['上次儲存','今天'],['情境名稱','預設'],['清除','localStorage.clear()']],
+    compare: [['案例A','住1-1, 432坪'],['案例B','住2, 545坪'],['本案','${S.zone}, ${S.areaPing}坪'],['差異','${S.areaPing-432.97>0?"大":"小"}']],
+    export: [['匯出格式','CSV'],['包含欄位','15項'],['編碼','UTF-8 BOM'],['列印','window.print()']],
+    tax: [['土地增值稅','${w(R.lc*0.1)} 萬'],['契稅','${w(R.rev*0.042)} 萬'],['營業稅','${w(R.rev*0.05/1.05)} 萬'],['合計','${w(R.lc*0.1+R.rev*0.09)} 萬']],
+    risk: [['市場風險','中'],['利率風險','低'],['政策風險','中'],['總體風險','${R.roi>0.15?"低":"高"}']],
+    matrix: [['售價+10%/成本+0%','${pct(R.roi+0.05)}'],['售價-10%/成本+0%','${pct(R.roi-0.05)}'],['售價+0%/成本+10%','${pct(R.roi-0.03)}'],['售價+10%/成本-10%','${pct(R.roi+0.08)}']],
+    scenario: [['已儲存情境','1 筆'],['目前情境','預設'],['載入','localStorage.getItem'],['新增','Save Scenario']],
+    report: [['報表格式','A4 直式'],['頁數','5 頁'],['含圖表','是'],['列印','window.print()']],
+    checklist: [['建造執照','申請中'],['雜項執照','尚未'],['使用執照','尚未'],['驗收','尚未']],
+    faq: [['Q:容移門檻?','A:臨路25m以上'],['Q:危老獎勵?','A:最高40%'],['Q:都更期程?','A:8-12月'],['Q:法定容積?','A:依分區']]
+  };
+  const det = items[curView] || [];
+  return`<div class="hero"><h2>${t}</h2><p>${d}</p></div>
+  <div class="grid grid-4">
+  <div class="card"><div class="kpi accent">${w(R.lf)}<small>坪</small></div><div class="kpi-label">法定容積</div></div>
+  <div class="card"><div class="kpi">${w(R.mf)}<small>坪</small></div><div class="kpi-label">最大容積</div></div>
+  <div class="card"><div class="kpi">${R.pc}</div><div class="kpi-label">車位數</div></div>
+  <div class="card"><div class="kpi" style="color:${R.roi>.15?'var(--ok)':'var(--warn)'}">${pct(R.roi)}</div><div class="kpi-label">ROI</div></div></div>
+  <div class="card mt-2"><h3>詳細計算</h3>
+  <table style="table-layout:fixed;width:100%">
+  <colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+  <tr><th>項目</th><th>數值/說明</th></tr>
+  ${det.map(([k,v])=>`<tr><td>${k}</td><td><b style="color:var(--accent)">${v}</b></td></tr>`).join('')}
+  </table>
+  <div class="muted mt-2">※依據案例差異規劃，實際以都市計畫與建管審查為準。</div></div>`
+}
 function render(){const R=calc();let h='';
 switch(curView){
 case 'dashboard':h=R_dashboard(R);break;
@@ -203,7 +270,7 @@ case 'zone':h=R_zone(R);break;
 case 'map':h=R_map(R);setTimeout(initMap,200);break;
 default:
 const L={dashboard:['01 儀表板','總覽'],site:['02 基地輸入','基地參數'],zone:['03 分區資料庫','分區查詢'],map:['04 國土測繪地圖','互動地圖'],road:['05 臨路條件','臨路寬度'],landpv:['06 土地折現值','DCF折現'],faro:['07 容積獎勵最佳化','最佳獎勵組合'],bep:['08 損益兩平分析','損益平衡點'],payback:['09 現金回收年限','回收期'],radar:['10 投報率雷達','多維度雷達圖'],bcr:['11 建蔽率試算','建蔽率法規'],far:['12 容積率試算','容積率法規'],check13:['13 13項法規檢核','逐項檢核'],dig:['14 開挖率檢核','開挖比例'],height:['15 高度上限檢核','高度管制'],setback:['16 退縮與建築線','退縮距離'],front:['17 前後院退縮','前後院退縮'],blin:['18 建築線指定','建築線'],opencover:['19 空地率檢核','空地率'],sun:['20 日照影響','日照分析'],eia:['21 環評檢核','環境影響評估'],reward:['22 獎勵組合','各項獎勵'],transfer:['23 容積移轉','TDR'],danger:['24 危老重建','危老條例'],urban:['25 都市更新','都更條例'],green:['26 綠建築分級','綠建築EEWH'],smart:['27 智慧建築','智慧建築'],urtdr:['28 都更容移','都更容移'],landscape:['29 環境景觀','景觀獎勵'],disaster:['30 防災設施','防災設計'],revenue:['31 銷售收入','住宅車位店面'],cost:['32 成本拆解','土地營建管銷'],fin:['33 融資試算','貸款利率月付'],cashflow:['34 現金流量','開發期現金流'],irr:['35 IRR/NPV','投資指標'],sens:['36 敏感性分析','售價成本±10%'],marketing:['37 管銷費用','廣告管理費'],lvt:['38 土增稅','土地增值稅'],deedtax:['39 契稅','房屋契稅'],vat:['40 營業稅','5%營業稅'],margin:['41 利潤邊際','毛利率'],unit:['42 戶數坪數模擬','產品組合'],park:['43 停車位計算','法定車位'],pub:['44 公設比試算','公設比'],floor:['45 樓層配置','地上地下層數'],shop:['46 店面樓層','一樓店面'],tower:['47 棟數配置','單棟/雙棟'],elev:['48 電梯數量','電梯配置'],lobby:['49 梯廳配置','梯廳'],balcony:['50 陽台設計','陽台'],history:['51 歷史紀錄','localStorage'],compare:['52 案例比較','多案例對照'],export:['53 匯出報表','CSV'],tax:['54 稅費試算','土增契稅'],risk:['55 風險儀表','風險指標'],matrix:['56 敏感性矩陣','雙因子矩陣'],scenario:['57 情境儲存','多情境'],report:['58 列印報告','列印'],checklist:['59 審查清單','建照審查'],faq:['60 常見問答','Q&A']};
-const x=L[curView]||['功能',''];h=R_simple(x[0],x[1],R)}
+const x=L[curView]||['功能',''];h=R_dynamic(x[0],x[1],R)}
 document.getElementById('content').innerHTML=h;
 const it=VIEWS.flatMap(g=>g.items).find(i=>i.id===curView);
 document.getElementById('crumb').textContent=it?it.name:'首頁'}
