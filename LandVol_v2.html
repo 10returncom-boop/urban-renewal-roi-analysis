@@ -818,7 +818,7 @@ VIEW_BUILDERS.f03 = R=>`
   <div class="muted mb-2">點選任一列即可帶入該分區的法定建蔽率與容積率（以台中市常見分區為例，實際依各縣市細部計畫）</div>
   <input type="text" id="zoneSearch" placeholder="🔍 輸入分區名稱篩選（例：住、商、工業）..." oninput="filterZoneTable()" style="width:100%;padding:8px 12px;margin-bottom:12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)">
   <div style="overflow-x:auto">
-  <table class="tbl" id="zoneDbTable" style="table-layout:fixed;width:100%">
+  <table class="tbl" id="zoneDbTable" style="table-layout:fixed;width:100%"><colgroup><col style="width:14%"><col style="width:22%"><col style="width:14%"><col style="width:14%"><col style="width:36%"></colgroup>
     <thead><tr><th style="width:18%">分區代碼</th><th style="width:22%">分區名稱</th><th style="width:15%">建蔽率</th><th style="width:15%">容積率</th><th style="width:30%">備註</th></tr></thead>
     <tbody>
       <tr class="zone-row" data-zone="住1" data-bcr="0.60" data-far="1.65" onclick="applyZone(this)"><td>住1</td><td>第一種住宅區</td><td>60%</td><td>165%</td><td>低密度住宅，北屯/西屯常見</td></tr>
@@ -883,7 +883,7 @@ VIEW_BUILDERS.f06 = R=>`
 </div>
 <div class="card mt-2">
   <h3>正常版 vs 獎勵版 對照</h3>
-  <table class="tbl">
+  <table class="tbl" style="table-layout:fixed;width:100%"><colgroup><col style="width:18%"><col style="width:27%"><col style="width:27%"><col style="width:28%"></colgroup>
     <tr><th>項目</th><th>正常版（純法定）</th><th>本案獎勵版</th><th>差異</th></tr>
     <tr><td>容積率</td><td class="num">${pct(S.far)}</td><td class="num">${pct(S.farCap)}</td><td class="num" style="color:var(--accent)">+${pct(S.farCap-S.far)}</td></tr>
     <tr><td>總容積坪數</td><td class="num">${w(R.legalFar)} 坪</td><td class="num">${w(S.areaPing*S.farCap)} 坪</td><td class="num" style="color:var(--accent)">+${w(S.areaPing*(S.farCap-S.far))} 坪</td></tr>
