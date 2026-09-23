@@ -454,8 +454,8 @@ const CASES = {
   A:{
     name:'北屯南興段226', zone:'住1-1',
     areaPing:432.965, areaM2:1431.29,
-    bcr:0.60, far:2.20, excav:0.75, farCap:3.20,
-    road:'20m 大隆路 / 9m 大容東街', roadWidth:20,
+    bcr:0.60, far:1.65, excav:0.75, farCap:2.72,
+    road:'25m 大隆路 / 9m 大容東街', roadWidth:25,
     transferCap:0.40, useTransfer:true,
     rewardOldBuilding:0.06, rewardRetreat:0.10, rewardScale:0.08,
     rewardSeismic:0.04, rewardSmart:0.06,
@@ -464,13 +464,13 @@ const CASES = {
     landPrice:120, housePrice:65, parkingPrice:240, shopPrice:0,
     announceValue:92900, prevTransferValue:92900, cpi:1.02,
     transferCostMult:2.2,
-    note:'危老重建：規模8%+老舊6%+退縮10%=24%；另採容移40%'
+    note:'住1-1法定容積率165%；危老重建：規模8%+老舊6%+退縮10%=24%；另採容移40%。※依據案例差異規劃，實際數值以都計分區為準'
   },
   B:{
     name:'南屯惠信段10', zone:'住2',
     areaPing:545.24, areaM2:545.24*3.3058,
-    bcr:0.60, far:2.20, excav:0.75, farCap:3.20,
-    road:'20m 大墩十一街 / 6m 巷', roadWidth:20,
+    bcr:0.60, far:1.80, excav:0.75, farCap:2.16,
+    road:'25m 大墩十一街 / 6m 巷', roadWidth:25,
     transferCap:0, useTransfer:false,
     rewardOldBuilding:0, rewardRetreat:0, rewardScale:0,
     rewardSeismic:0, rewardSmart:0,
@@ -479,7 +479,7 @@ const CASES = {
     landPrice:150, housePrice:72, parkingPrice:230, shopPrice:0,
     announceValue:115112, prevTransferValue:92900, cpi:1.02,
     transferCostMult:2.2,
-    note:'採開放空間獎勵20%；公告現值115,112元/㎡，受最小單元限制不採容移'
+    note:'住2法定容積率180%；採開放空間獎勵20%；公告現值115,112元/㎡，受最小單元限制不採容移。※依據案例差異規劃，實際數值以都計分區為準'
   }
 };
 
@@ -806,10 +806,10 @@ VIEW_BUILDERS.f04 = R=>`
   <div class="card"><h3>臨路條件</h3>
     <div class="field"><label>臨接道路</label><input value="${S.road}"></div>
     <div class="field"><label>最寬臨路（m）</label><input type="number" data-bind="roadWidth" value="${S.roadWidth}"></div>
-    <div class="formula">臺中市容移要點：<br>• 臨路 ≥ 20m → 可移入 30~40%<br>• 臨路 15~20m → 可移入 20~30%<br>• 臨路 &lt; 15m → 不得容移</div>
+    <div class="formula">臺中市容積移轉要點（依據案例差異規劃）：<br>• 臨路 ≥ <b>25m</b> → 可移入 30~40%<br>• 臨路 15~25m → 可移入 20~30%<br>• 臨路 &lt; 15m → 不得容移<br><span class="muted">※ 實際以台中市政府最新容移審查要點為準</span></div>
   </div>
   <div class="card"><h3>自動判定</h3>
-    ${S.roadWidth>=20?`<div class="gauge gauge-green"><div class="gauge-light">✓</div><div><b>符合寬臨路條件</b><div class="muted">可申請最高 ${pct(S.transferCap)} 容積移入</div></div></div>`
+    ${S.roadWidth>=25?`<div class="gauge gauge-green"><div class="gauge-light">✓</div><div><b>符合寬臨路條件</b><div class="muted">可申請最高 ${pct(S.transferCap)} 容積移入</div></div></div>`
      : S.roadWidth>=15?`<div class="gauge gauge-yellow"><div class="gauge-light">!</div><div><b>中等臨路</b><div class="muted">容移上限降至 20%</div></div></div>`
      : `<div class="gauge gauge-red"><div class="gauge-light">✕</div><div><b>臨路不足</b><div class="muted">未達15m，不得申請容積移轉</div></div></div>`}
   </div>
@@ -831,11 +831,22 @@ VIEW_BUILDERS.f05 = R=>`
 
 /* ===== F06 容積率試算 ===== */
 VIEW_BUILDERS.f06 = R=>`
-<div class="view-head"><h2><span class="num">06</span>法定容積率試算</h2><p>容積率＝總樓地板面積 ÷ 基地面積，決定全部樓層總坪數。</p></div>
+<div class="view-head"><h2><span class="num">06</span>法定容積率試算</h2><p>容積率＝總樓地板面積 ÷ 基地面積，決定全部樓層總坪數。<span class="muted">（※依據案例差異規劃，以下分「純法定」與「獎勵後」兩版對照）</span></p></div>
 <div class="grid grid-3">
-  <div class="card"><h3>法定容積率</h3><div class="kpi accent">${pct(S.far)}</div><div class="kpi-label">基準容積率</div></div>
-  <div class="card"><h3>法定容積總坪數</h3><div class="kpi">${w(R.legalFar)}<small>坪</small></div><div class="kpi-label">${S.areaPing.toFixed(1)} × ${pct(S.far)}</div></div>
-  <div class="card"><h3>獎勵後上限</h3><div class="kpi warn">${pct(S.farCap)}</div><div class="kpi-label">含容移與獎勵封頂</div></div>
+  <div class="card"><h3>法定容積率（純法定版）</h3><div class="kpi accent">${pct(S.far)}</div><div class="kpi-label">${S.zone} 分區基準，無任何獎勵</div></div>
+  <div class="card"><h3>純法定容積坪數</h3><div class="kpi">${w(R.legalFar)}<small>坪</small></div><div class="kpi-label">${S.areaPing.toFixed(1)}坪 × ${pct(S.far)}</div></div>
+  <div class="card"><h3>獎勵後封頂容積率</h3><div class="kpi warn">${pct(S.farCap)}</div><div class="kpi-label">含危老+容移+開放空間</div></div>
+</div>
+<div class="card mt-2">
+  <h3>正常版 vs 獎勵版 對照</h3>
+  <table class="tbl">
+    <tr><th>項目</th><th>正常版（純法定）</th><th>本案獎勵版</th><th>差異</th></tr>
+    <tr><td>容積率</td><td class="num">${pct(S.far)}</td><td class="num">${pct(S.farCap)}</td><td class="num" style="color:var(--accent)">+${pct(S.farCap-S.far)}</td></tr>
+    <tr><td>總容積坪數</td><td class="num">${w(R.legalFar)} 坪</td><td class="num">${w(S.areaPing*S.farCap)} 坪</td><td class="num" style="color:var(--accent)">+${w(S.areaPing*(S.farCap-S.far))} 坪</td></tr>
+    <tr><td>適用法規</td><td>都市計畫分區管制</td><td>危老條例+容移要點+獎勵辦法</td><td>—</td></tr>
+    <tr><td>審查程序</td><td>免都審，直接申請建照</td><td>需都審/容移審查</td><td>時程+6~12個月</td></tr>
+  </table>
+  <div class="muted mt-2">※ 正常版為不申請任何獎勵之基準試算；實際數值依各地細部計畫與分區管制自治條例而異。</div>
 </div>
 <div class="card mt-2"><h3>容積組成（試算中）</h3>
 <table><colgroup><col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup>
